@@ -1,0 +1,1058 @@
+[
+  {
+    "name": "adobe acrobat",
+    "display_name": "Adobe Acrobat",
+    "category": "Document management software",
+    "hot_technology": true
+  },
+  {
+    "name": "adobe after effects",
+    "display_name": "Adobe After Effects",
+    "category": "Video creation and editing software",
+    "hot_technology": true
+  },
+  {
+    "name": "adobe creative cloud software",
+    "display_name": "Adobe Creative Cloud software",
+    "category": "Graphics or photo imaging software",
+    "hot_technology": true
+  },
+  {
+    "name": "adobe illustrator",
+    "display_name": "Adobe Illustrator",
+    "category": "Graphics or photo imaging software",
+    "hot_technology": true
+  },
+  {
+    "name": "adobe indesign",
+    "display_name": "Adobe InDesign",
+    "category": "Desktop publishing software",
+    "hot_technology": true
+  },
+  {
+    "name": "adobe photoshop",
+    "display_name": "Adobe Photoshop",
+    "category": "Graphics or photo imaging software",
+    "hot_technology": true
+  },
+  {
+    "name": "ajax",
+    "display_name": "AJAX",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "alteryx software",
+    "display_name": "Alteryx software",
+    "category": "Business intelligence and data analysis software",
+    "hot_technology": true
+  },
+  {
+    "name": "amazon dynamodb",
+    "display_name": "Amazon DynamoDB",
+    "category": "Data base management system software",
+    "hot_technology": true
+  },
+  {
+    "name": "amazon elastic compute cloud ec2",
+    "display_name": "Amazon Elastic Compute Cloud EC2",
+    "category": "Data base user interface and query software",
+    "hot_technology": true
+  },
+  {
+    "name": "amazon redshift",
+    "display_name": "Amazon Redshift",
+    "category": "Data base user interface and query software",
+    "hot_technology": true
+  },
+  {
+    "name": "amazon web services aws cloudformation",
+    "display_name": "Amazon Web Services AWS CloudFormation",
+    "category": "Cloud-based management software",
+    "hot_technology": true
+  },
+  {
+    "name": "amazon web services aws software",
+    "display_name": "Amazon Web Services AWS software",
+    "category": "Data base user interface and query software",
+    "hot_technology": true
+  },
+  {
+    "name": "ansible software",
+    "display_name": "Ansible software",
+    "category": "Expert system software",
+    "hot_technology": true
+  },
+  {
+    "name": "apache airflow",
+    "display_name": "Apache Airflow",
+    "category": "Procedure management software",
+    "hot_technology": true
+  },
+  {
+    "name": "apache cassandra",
+    "display_name": "Apache Cassandra",
+    "category": "Data base management system software",
+    "hot_technology": true
+  },
+  {
+    "name": "apache hadoop",
+    "display_name": "Apache Hadoop",
+    "category": "Data base management system software",
+    "hot_technology": true
+  },
+  {
+    "name": "apache hive",
+    "display_name": "Apache Hive",
+    "category": "Data base management system software",
+    "hot_technology": true
+  },
+  {
+    "name": "apache kafka",
+    "display_name": "Apache Kafka",
+    "category": "Development environment software",
+    "hot_technology": true
+  },
+  {
+    "name": "apache maven",
+    "display_name": "Apache Maven",
+    "category": "Development environment software",
+    "hot_technology": true
+  },
+  {
+    "name": "apache spark",
+    "display_name": "Apache Spark",
+    "category": "Business intelligence and data analysis software",
+    "hot_technology": true
+  },
+  {
+    "name": "apache subversion svn",
+    "display_name": "Apache Subversion SVN",
+    "category": "File versioning software",
+    "hot_technology": true
+  },
+  {
+    "name": "apache tomcat",
+    "display_name": "Apache Tomcat",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "apple ios",
+    "display_name": "Apple iOS",
+    "category": "Operating system software",
+    "hot_technology": true
+  },
+  {
+    "name": "apple macos",
+    "display_name": "Apple macOS",
+    "category": "Operating system software",
+    "hot_technology": true
+  },
+  {
+    "name": "apple safari",
+    "display_name": "Apple Safari",
+    "category": "Internet browser software",
+    "hot_technology": true
+  },
+  {
+    "name": "asana",
+    "display_name": "Asana",
+    "category": "Cloud-based data access and sharing software",
+    "hot_technology": true
+  },
+  {
+    "name": "atlassian bitbucket",
+    "display_name": "Atlassian Bitbucket",
+    "category": "Application server software",
+    "hot_technology": true
+  },
+  {
+    "name": "atlassian confluence",
+    "display_name": "Atlassian Confluence",
+    "category": "Project management software",
+    "hot_technology": true
+  },
+  {
+    "name": "atlassian jira",
+    "display_name": "Atlassian JIRA",
+    "category": "Content workflow software",
+    "hot_technology": true
+  },
+  {
+    "name": "autodesk autocad",
+    "display_name": "Autodesk AutoCAD",
+    "category": "Computer aided design CAD software",
+    "hot_technology": true
+  },
+  {
+    "name": "autodesk autocad civil 3d",
+    "display_name": "Autodesk AutoCAD Civil 3D",
+    "category": "Computer aided design CAD software",
+    "hot_technology": true
+  },
+  {
+    "name": "autodesk revit",
+    "display_name": "Autodesk Revit",
+    "category": "Computer aided design CAD software",
+    "hot_technology": true
+  },
+  {
+    "name": "bash",
+    "display_name": "Bash",
+    "category": "Operating system software",
+    "hot_technology": true
+  },
+  {
+    "name": "bentley microstation",
+    "display_name": "Bentley MicroStation",
+    "category": "Computer aided design CAD software",
+    "hot_technology": true
+  },
+  {
+    "name": "bootstrap",
+    "display_name": "Bootstrap",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "border gateway protocol bgp",
+    "display_name": "Border Gateway Protocol BGP",
+    "category": "Switch or router software",
+    "hot_technology": true
+  },
+  {
+    "name": "c",
+    "display_name": "C",
+    "category": "Development environment software",
+    "hot_technology": true
+  },
+  {
+    "name": "c#",
+    "display_name": "C#",
+    "category": "Object or component oriented development software",
+    "hot_technology": true
+  },
+  {
+    "name": "c++",
+    "display_name": "C++",
+    "category": "Object or component oriented development software",
+    "hot_technology": true
+  },
+  {
+    "name": "canva",
+    "display_name": "Canva",
+    "category": "Graphics or photo imaging software",
+    "hot_technology": true
+  },
+  {
+    "name": "cascading style sheets css",
+    "display_name": "Cascading style sheets CSS",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "chef",
+    "display_name": "Chef",
+    "category": "Configuration management software",
+    "hot_technology": true
+  },
+  {
+    "name": "cisco webex",
+    "display_name": "Cisco Webex",
+    "category": "Video conferencing software",
+    "hot_technology": true
+  },
+  {
+    "name": "dassault systemes solidworks",
+    "display_name": "Dassault Systemes SolidWorks",
+    "category": "Computer aided design CAD software",
+    "hot_technology": true
+  },
+  {
+    "name": "django",
+    "display_name": "Django",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "docker",
+    "display_name": "Docker",
+    "category": "Application server software",
+    "hot_technology": true
+  },
+  {
+    "name": "eclinicalworks ehr software",
+    "display_name": "eClinicalWorks EHR software",
+    "category": "Medical software",
+    "hot_technology": true
+  },
+  {
+    "name": "eclipse ide",
+    "display_name": "Eclipse IDE",
+    "category": "Development environment software",
+    "hot_technology": true
+  },
+  {
+    "name": "elasticsearch",
+    "display_name": "Elasticsearch",
+    "category": "Data base management system software",
+    "hot_technology": true
+  },
+  {
+    "name": "epic systems",
+    "display_name": "Epic Systems",
+    "category": "Medical software",
+    "hot_technology": true
+  },
+  {
+    "name": "esri arcgis software",
+    "display_name": "ESRI ArcGIS software",
+    "category": "Geographic information system",
+    "hot_technology": true
+  },
+  {
+    "name": "extensible markup language xml",
+    "display_name": "Extensible markup language XML",
+    "category": "Enterprise application integration software",
+    "hot_technology": true
+  },
+  {
+    "name": "facebook",
+    "display_name": "Facebook",
+    "category": "Web page creation and editing software",
+    "hot_technology": true
+  },
+  {
+    "name": "figma",
+    "display_name": "Figma",
+    "category": "Graphical user interface development software",
+    "hot_technology": true
+  },
+  {
+    "name": "git",
+    "display_name": "Git",
+    "category": "File versioning software",
+    "hot_technology": true
+  },
+  {
+    "name": "github",
+    "display_name": "GitHub",
+    "category": "Application server software",
+    "hot_technology": true
+  },
+  {
+    "name": "gitlab",
+    "display_name": "GitLab",
+    "category": "Application server software",
+    "hot_technology": true
+  },
+  {
+    "name": "go",
+    "display_name": "Go",
+    "category": "Development environment software",
+    "hot_technology": true
+  },
+  {
+    "name": "google analytics",
+    "display_name": "Google Analytics",
+    "category": "Data mining software",
+    "hot_technology": true
+  },
+  {
+    "name": "google android",
+    "display_name": "Google Android",
+    "category": "Operating system software",
+    "hot_technology": true
+  },
+  {
+    "name": "google angular",
+    "display_name": "Google Angular",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "google docs",
+    "display_name": "Google Docs",
+    "category": "Word processing software",
+    "hot_technology": true
+  },
+  {
+    "name": "google looker analytics",
+    "display_name": "Google Looker Analytics",
+    "category": "Business intelligence and data analysis software",
+    "hot_technology": true
+  },
+  {
+    "name": "google sheets",
+    "display_name": "Google Sheets",
+    "category": "Spreadsheet software",
+    "hot_technology": true
+  },
+  {
+    "name": "google workspace software",
+    "display_name": "Google Workspace software",
+    "category": "Office suite software",
+    "hot_technology": true
+  },
+  {
+    "name": "grafana labs grafana cloud",
+    "display_name": "Grafana Labs Grafana Cloud",
+    "category": "Graphical user interface development software",
+    "hot_technology": true
+  },
+  {
+    "name": "graphql",
+    "display_name": "GraphQL",
+    "category": "Data base user interface and query software",
+    "hot_technology": true
+  },
+  {
+    "name": "henry schein dentrix",
+    "display_name": "Henry Schein Dentrix",
+    "category": "Medical software",
+    "hot_technology": true
+  },
+  {
+    "name": "hibernate orm",
+    "display_name": "Hibernate ORM",
+    "category": "Object oriented data base management software",
+    "hot_technology": true
+  },
+  {
+    "name": "hubspot software",
+    "display_name": "HubSpot software",
+    "category": "Sales and marketing software",
+    "hot_technology": true
+  },
+  {
+    "name": "hypertext markup language html",
+    "display_name": "Hypertext markup language HTML",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "ibm db2",
+    "display_name": "IBM DB2",
+    "category": "Data base user interface and query software",
+    "hot_technology": true
+  },
+  {
+    "name": "ibm spss statistics",
+    "display_name": "IBM SPSS Statistics",
+    "category": "Analytical or scientific software",
+    "hot_technology": true
+  },
+  {
+    "name": "ibm terraform",
+    "display_name": "IBM Terraform",
+    "category": "Configuration management software",
+    "hot_technology": true
+  },
+  {
+    "name": "ibm websphere mq",
+    "display_name": "IBM WebSphere MQ",
+    "category": "Cloud-based management software",
+    "hot_technology": true
+  },
+  {
+    "name": "informatica software",
+    "display_name": "Informatica software",
+    "category": "Metadata management software",
+    "hot_technology": true
+  },
+  {
+    "name": "intuit quickbooks",
+    "display_name": "Intuit QuickBooks",
+    "category": "Accounting software",
+    "hot_technology": true
+  },
+  {
+    "name": "intuit turbotax",
+    "display_name": "Intuit TurboTax",
+    "category": "Tax preparation software",
+    "hot_technology": true
+  },
+  {
+    "name": "javascript",
+    "display_name": "JavaScript",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "javascript object notation json",
+    "display_name": "JavaScript Object Notation JSON",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "jenkins ci",
+    "display_name": "Jenkins CI",
+    "category": "Enterprise application integration software",
+    "hot_technology": true
+  },
+  {
+    "name": "jquery",
+    "display_name": "jQuery",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "junit",
+    "display_name": "JUnit",
+    "category": "Program testing software",
+    "hot_technology": true
+  },
+  {
+    "name": "kronos workforce timekeeper",
+    "display_name": "Kronos Workforce Timekeeper",
+    "category": "Time accounting software",
+    "hot_technology": true
+  },
+  {
+    "name": "kubernetes",
+    "display_name": "Kubernetes",
+    "category": "Application server software",
+    "hot_technology": true
+  },
+  {
+    "name": "linux",
+    "display_name": "Linux",
+    "category": "Operating system software",
+    "hot_technology": true
+  },
+  {
+    "name": "marketo marketing automation",
+    "display_name": "Marketo Marketing Automation",
+    "category": "Sales and marketing software",
+    "hot_technology": true
+  },
+  {
+    "name": "meditech software",
+    "display_name": "MEDITECH software",
+    "category": "Medical software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft .net framework",
+    "display_name": "Microsoft .NET Framework",
+    "category": "Development environment software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft access",
+    "display_name": "Microsoft Access",
+    "category": "Data base user interface and query software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft active directory",
+    "display_name": "Microsoft Active Directory",
+    "category": "Internet directory services software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft active server pages asp",
+    "display_name": "Microsoft Active Server Pages ASP",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft asp.net",
+    "display_name": "Microsoft ASP.NET",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft azure software",
+    "display_name": "Microsoft Azure software",
+    "category": "Development environment software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft edge",
+    "display_name": "Microsoft Edge",
+    "category": "Internet browser software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft excel",
+    "display_name": "Microsoft Excel",
+    "category": "Spreadsheet software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft office software",
+    "display_name": "Microsoft Office software",
+    "category": "Office suite software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft outlook",
+    "display_name": "Microsoft Outlook",
+    "category": "Electronic mail software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft power automate",
+    "display_name": "Microsoft Power Automate",
+    "category": "Enterprise application integration software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft power bi",
+    "display_name": "Microsoft Power BI",
+    "category": "Business intelligence and data analysis software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft power platform software",
+    "display_name": "Microsoft Power Platform software",
+    "category": "Enterprise application integration software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft powerpoint",
+    "display_name": "Microsoft PowerPoint",
+    "category": "Presentation software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft powershell",
+    "display_name": "Microsoft PowerShell",
+    "category": "Development environment software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft project",
+    "display_name": "Microsoft Project",
+    "category": "Project management software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft sharepoint",
+    "display_name": "Microsoft SharePoint",
+    "category": "Document management software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft sql server",
+    "display_name": "Microsoft SQL Server",
+    "category": "Data base user interface and query software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft sql server integration services ssis",
+    "display_name": "Microsoft SQL Server Integration Services SSIS",
+    "category": "Enterprise application integration software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft sql server reporting services ssrs",
+    "display_name": "Microsoft SQL Server Reporting Services SSRS",
+    "category": "Data base reporting software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft team foundation server",
+    "display_name": "Microsoft Team Foundation Server",
+    "category": "Project management software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft teams",
+    "display_name": "Microsoft Teams",
+    "category": "Project management software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft visio",
+    "display_name": "Microsoft Visio",
+    "category": "Process mapping and design software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft visual basic",
+    "display_name": "Microsoft Visual Basic",
+    "category": "Development environment software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft visual basic for applications vba",
+    "display_name": "Microsoft Visual Basic for Applications VBA",
+    "category": "Development environment software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft visual studio",
+    "display_name": "Microsoft Visual Studio",
+    "category": "Development environment software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft windows",
+    "display_name": "Microsoft Windows",
+    "category": "Operating system software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft windows server",
+    "display_name": "Microsoft Windows Server",
+    "category": "Operating system software",
+    "hot_technology": true
+  },
+  {
+    "name": "microsoft word",
+    "display_name": "Microsoft Word",
+    "category": "Word processing software",
+    "hot_technology": true
+  },
+  {
+    "name": "mongodb",
+    "display_name": "MongoDB",
+    "category": "Data base management system software",
+    "hot_technology": true
+  },
+  {
+    "name": "mozilla firefox",
+    "display_name": "Mozilla Firefox",
+    "category": "Internet browser software",
+    "hot_technology": true
+  },
+  {
+    "name": "mysql",
+    "display_name": "MySQL",
+    "category": "Data base user interface and query software",
+    "hot_technology": true
+  },
+  {
+    "name": "node.js",
+    "display_name": "Node.js",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "nosql",
+    "display_name": "NoSQL",
+    "category": "Data base management system software",
+    "hot_technology": true
+  },
+  {
+    "name": "oracle cloud software",
+    "display_name": "Oracle Cloud software",
+    "category": "Cloud-based management software",
+    "hot_technology": true
+  },
+  {
+    "name": "oracle database",
+    "display_name": "Oracle Database",
+    "category": "Data base user interface and query software",
+    "hot_technology": true
+  },
+  {
+    "name": "oracle java",
+    "display_name": "Oracle Java",
+    "category": "Object or component oriented development software",
+    "hot_technology": true
+  },
+  {
+    "name": "oracle java 2 platform enterprise edition j2ee",
+    "display_name": "Oracle Java 2 Platform Enterprise Edition J2EE",
+    "category": "Development environment software",
+    "hot_technology": true
+  },
+  {
+    "name": "oracle peoplesoft",
+    "display_name": "Oracle PeopleSoft",
+    "category": "Enterprise resource planning ERP software",
+    "hot_technology": true
+  },
+  {
+    "name": "oracle pl/sql",
+    "display_name": "Oracle PL/SQL",
+    "category": "Data base management system software",
+    "hot_technology": true
+  },
+  {
+    "name": "oracle primavera enterprise project portfolio management",
+    "display_name": "Oracle Primavera Enterprise Project Portfolio Management",
+    "category": "Project management software",
+    "hot_technology": true
+  },
+  {
+    "name": "oracle sql developer",
+    "display_name": "Oracle SQL Developer",
+    "category": "Development environment software",
+    "hot_technology": true
+  },
+  {
+    "name": "perl",
+    "display_name": "Perl",
+    "category": "Object or component oriented development software",
+    "hot_technology": true
+  },
+  {
+    "name": "php",
+    "display_name": "PHP",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "postgresql",
+    "display_name": "PostgreSQL",
+    "category": "Object oriented data base management software",
+    "hot_technology": true
+  },
+  {
+    "name": "procore software",
+    "display_name": "Procore software",
+    "category": "Analytical or scientific software",
+    "hot_technology": true
+  },
+  {
+    "name": "prometheus",
+    "display_name": "Prometheus",
+    "category": "Data base user interface and query software",
+    "hot_technology": true
+  },
+  {
+    "name": "puppet",
+    "display_name": "Puppet",
+    "category": "Configuration management software",
+    "hot_technology": true
+  },
+  {
+    "name": "python",
+    "display_name": "Python",
+    "category": "Object or component oriented development software",
+    "hot_technology": true
+  },
+  {
+    "name": "pytorch",
+    "display_name": "PyTorch",
+    "category": "Data base user interface and query software",
+    "hot_technology": true
+  },
+  {
+    "name": "r",
+    "display_name": "R",
+    "category": "Object or component oriented development software",
+    "hot_technology": true
+  },
+  {
+    "name": "react",
+    "display_name": "React",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "red hat enterprise linux",
+    "display_name": "Red Hat Enterprise Linux",
+    "category": "Operating system software",
+    "hot_technology": true
+  },
+  {
+    "name": "red hat openshift",
+    "display_name": "Red Hat OpenShift",
+    "category": "Application server software",
+    "hot_technology": true
+  },
+  {
+    "name": "redis",
+    "display_name": "Redis",
+    "category": "Data base management system software",
+    "hot_technology": true
+  },
+  {
+    "name": "ruby",
+    "display_name": "Ruby",
+    "category": "Development environment software",
+    "hot_technology": true
+  },
+  {
+    "name": "salesforce software",
+    "display_name": "Salesforce software",
+    "category": "Customer relationship management CRM software",
+    "hot_technology": true
+  },
+  {
+    "name": "sap concur",
+    "display_name": "SAP Concur",
+    "category": "Accounting software",
+    "hot_technology": true
+  },
+  {
+    "name": "sap erp",
+    "display_name": "SAP ERP",
+    "category": "Enterprise resource planning ERP software",
+    "hot_technology": true
+  },
+  {
+    "name": "sap software",
+    "display_name": "SAP software",
+    "category": "Enterprise resource planning ERP software",
+    "hot_technology": true
+  },
+  {
+    "name": "sas",
+    "display_name": "SAS",
+    "category": "Analytical or scientific software",
+    "hot_technology": true
+  },
+  {
+    "name": "scala",
+    "display_name": "Scala",
+    "category": "Object or component oriented development software",
+    "hot_technology": true
+  },
+  {
+    "name": "selenium",
+    "display_name": "Selenium",
+    "category": "Program testing software",
+    "hot_technology": true
+  },
+  {
+    "name": "servicenow",
+    "display_name": "ServiceNow",
+    "category": "Data base user interface and query software",
+    "hot_technology": true
+  },
+  {
+    "name": "shell script",
+    "display_name": "Shell script",
+    "category": "Operating system software",
+    "hot_technology": true
+  },
+  {
+    "name": "slack",
+    "display_name": "Slack",
+    "category": "Cloud-based data access and sharing software",
+    "hot_technology": true
+  },
+  {
+    "name": "snowflake",
+    "display_name": "Snowflake",
+    "category": "Data mining software",
+    "hot_technology": true
+  },
+  {
+    "name": "splunk enterprise",
+    "display_name": "Splunk Enterprise",
+    "category": "Cloud-based management software",
+    "hot_technology": true
+  },
+  {
+    "name": "spring boot",
+    "display_name": "Spring Boot",
+    "category": "Application server software",
+    "hot_technology": true
+  },
+  {
+    "name": "spring framework",
+    "display_name": "Spring Framework",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "structured query language sql",
+    "display_name": "Structured query language SQL",
+    "category": "Data base user interface and query software",
+    "hot_technology": true
+  },
+  {
+    "name": "swift",
+    "display_name": "Swift",
+    "category": "Object or component oriented development software",
+    "hot_technology": true
+  },
+  {
+    "name": "tableau",
+    "display_name": "Tableau",
+    "category": "Business intelligence and data analysis software",
+    "hot_technology": true
+  },
+  {
+    "name": "tensorflow",
+    "display_name": "TensorFlow",
+    "category": "Analytical or scientific software",
+    "hot_technology": true
+  },
+  {
+    "name": "teradata database",
+    "display_name": "Teradata Database",
+    "category": "Data base management system software",
+    "hot_technology": true
+  },
+  {
+    "name": "the mathworks matlab",
+    "display_name": "The MathWorks MATLAB",
+    "category": "Analytical or scientific software",
+    "hot_technology": true
+  },
+  {
+    "name": "tiktok",
+    "display_name": "TikTok",
+    "category": "Video creation and editing software",
+    "hot_technology": true
+  },
+  {
+    "name": "transact-sql",
+    "display_name": "Transact-SQL",
+    "category": "Data base user interface and query software",
+    "hot_technology": true
+  },
+  {
+    "name": "trimble sketchup pro",
+    "display_name": "Trimble SketchUp Pro",
+    "category": "Computer aided design CAD software",
+    "hot_technology": true
+  },
+  {
+    "name": "typescript",
+    "display_name": "TypeScript",
+    "category": "Object or component oriented development software",
+    "hot_technology": true
+  },
+  {
+    "name": "unix",
+    "display_name": "UNIX",
+    "category": "Operating system software",
+    "hot_technology": true
+  },
+  {
+    "name": "unix shell",
+    "display_name": "UNIX Shell",
+    "category": "Operating system software",
+    "hot_technology": true
+  },
+  {
+    "name": "vue.js",
+    "display_name": "Vue.js",
+    "category": "Web platform development software",
+    "hot_technology": true
+  },
+  {
+    "name": "wordpress",
+    "display_name": "WordPress",
+    "category": "Web page creation and editing software",
+    "hot_technology": true
+  },
+  {
+    "name": "workday software",
+    "display_name": "Workday software",
+    "category": "Enterprise resource planning ERP software",
+    "hot_technology": true
+  },
+  {
+    "name": "yardi software",
+    "display_name": "Yardi software",
+    "category": "Data base user interface and query software",
+    "hot_technology": true
+  },
+  {
+    "name": "zoom",
+    "display_name": "Zoom",
+    "category": "Video conferencing software",
+    "hot_technology": true
+  }
+]
