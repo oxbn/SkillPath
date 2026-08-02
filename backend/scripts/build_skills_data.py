@@ -1,9 +1,10 @@
 import csv
 import json
+from pathlib import Path
 
-RAW_PATH = "backend/data/raw/software_skills.csv"
-OUT_PATH = "backend/data/skills.json"
-
+SCRIPT_DIR = Path(__file__).resolve().parent
+RAW_PATH = SCRIPT_DIR.parent / "data" / "raw" / "software_skills.csv"
+OUT_PATH = SCRIPT_DIR.parent / "data" / "skills.json"
 
 def build_skills():
     skills_by_key = {}
