@@ -4,8 +4,8 @@ import spacy
 from spacy.matcher import PhraseMatcher
 from pathlib import Path
 
-SCRIPTS_DIR = Path(__file__).resolve()
-SKILLS_PATH = SCRIPTS_DIR / "data" / "skills.json"
+BASE_DIR = Path(__file__).resolve().parent
+SKILLS_PATH = BASE_DIR / "data" / "skills.json"
 
 nlp = spacy.load("en_core_web_sm")
 
