@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SkillPath — market</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>What the market asks for</h1>
+        <p class="subtitle">
+          Skill demand across every cached job posting.
+          <a href="/">Analyze a single posting instead →</a>
+        </p>
+      </header>
+
+      <form id="filter-form">
+        <input
+          type="text"
+          id="title-filter"
+          placeholder="Filter by job title, e.g. engineer|data|analyst"
+          autofocus
+        />
+        <div class="actions">
+          <button type="submit" id="submit-button">Analyze</button>
+          <span class="hint" id="corpus-summary"></span>
+        </div>
+      </form>
+
+      <section id="results" aria-live="polite"></section>
+    </main>
+
+    <script>
+      const form = document.getElementById("filter-form");
+      const titleFilter = document.getElementById("title-filter");
+      const submitButton = document.getElementById("submit-button");
+      const summary = document.getElementById("corpus-summary");
+      const results = document.getElementById("results");
+
+      function renderMessage(text, variant) {
+        results.replaceChildren();
+        const message = document.createElement("p");
+        message.className = `message ${variant}`;
+        message.textContent = text;
+        results.append(message);
+      }
+
+      function renderSkills(report) {
+        results.replaceChildren();
+
+        const list = document.createElement("ol");
+        list.className = "skill-list market-list";
+
+        const top = report.skills[0]?.share || 1;
+
+        for (const skill of report.skills.slice(0, 40)) {
+          const item = document.createElement("li");
+
+          const name = document.createElement("span");
+          name.className = "skill-name";
+          name.textContent = skill.display_name;
+          item.append(name);
+
+          // A high share carried by a single company is usually that company's own jargon,
+          // not market demand — worth flagging rather than hiding.
+          if (skill.companies === 1 && report.companies > 1) {
+            const badge = document.createElement("span");
+            badge.className = "badge badge-warn";
+            badge.textContent = "1 company";
+            item.append(badge);
+          }
+
+          const bar = document.createElement("span");
+          bar.className = "bar";
+          const fill = document.createElement("span");
+          fill.className = "bar-fill";
+          fill.style.width = `${(skill.share / top) * 100}%`;
+          bar.append(fill);
+          item.append(bar);
+
+          const share = document.createElement("span");
+          share.className = "skill-share";
+          share.textContent = `${Math.round(skill.share * 100)}%`;
+          share.title = `${skill.postings} of ${report.postings} postings, ${skill.companies} companies`;
+          item.append(share);
+
+          list.append(item);
+        }
+
+        results.append(list);
+      }
+
+      async function analyze(event) {
+        event?.preventDefault();
+
+        submitButton.disabled = true;
+        renderMessage("Analyzing…", "loading");
+
+        const query = titleFilter.value.trim();
+        const url = query ? `/api/market?title=${encodeURIComponent(query)}` : "/api/market";
+
+        try {
+          const response = await fetch(url);
+          const body = await response.json();
+
+          if (!response.ok) {
+            throw new Error(body.detail || `Request failed (${response.status})`);
+          }
+
+          summary.textContent = `${body.postings} postings · ${body.companies} companies · ${body.boards.join(", ")}`;
+
+          if (body.skills.length === 0) {
+            renderMessage("No skills matched this corpus.", "empty");
+          } else {
+            renderSkills(body);
+          }
+        } catch (error) {
+          renderMessage(error.message, "error");
+        } finally {
+          submitButton.disabled = false;
+        }
+      }
+
+      form.addEventListener("submit", analyze);
+      analyze();
+    </script>
+  </body>
+</html>

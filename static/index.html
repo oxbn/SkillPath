@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SkillPath</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>SkillPath</h1>
+        <p class="subtitle">Paste a job description to see the skills it asks for.</p>
+      </header>
+
+      <form id="extract-form">
+        <textarea
+          id="job-text"
+          rows="14"
+          placeholder="Paste the full job description here&#10;&#10;Then press Extract skills, or hit Ctrl+Enter."
+          autofocus
+        ></textarea>
+        <div class="actions">
+          <button type="submit" id="submit-button">Extract skills</button>
+          <span class="hint">Ctrl+Enter</span>
+        </div>
+      </form>
+
+      <section id="results" aria-live="polite"></section>
+    </main>
+
+    <script>
+      const form = document.getElementById("extract-form");
+      const textarea = document.getElementById("job-text");
+      const submitButton = document.getElementById("submit-button");
+      const results = document.getElementById("results");
+
+      function renderMessage(text, variant) {
+        results.replaceChildren();
+        const message = document.createElement("p");
+        message.className = `message ${variant}`;
+        message.textContent = text;
+        results.append(message);
+      }
+
+      function renderSkills(skills) {
+        results.replaceChildren();
+
+        const heading = document.createElement("h2");
+        heading.textContent = `${skills.length} ${skills.length === 1 ? "skill" : "skills"} found`;
+        results.append(heading);
+
+        const list = document.createElement("ul");
+        list.className = "skill-list";
+
+        for (const skill of skills) {
+          const item = document.createElement("li");
+
+          const name = document.createElement("span");
+          name.className = "skill-name";
+          name.textContent = skill.display_name;
+          item.append(name);
+
+          if (skill.hot_technology) {
+            const badge = document.createElement("span");
+            badge.className = "badge";
+            badge.textContent = "hot";
+            item.append(badge);
+          }
+
+          const category = document.createElement("span");
+          category.className = "skill-category";
+          category.textContent = skill.category;
+          item.append(category);
+
+          list.append(item);
+        }
+
+        results.append(list);
+      }
+
+      async function extractSkills(event) {
+        event.preventDefault();
+
+        const text = textarea.value.trim();
+        if (!text) {
+          renderMessage("Paste a job description first.", "empty");
+          textarea.focus();
+          return;
+        }
+
+        submitButton.disabled = true;
+        renderMessage("Extracting…", "loading");
+
+        try {
+          const response = await fetch("/extract", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ text }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Request failed (${response.status})`);
+          }
+
+          const { skills } = await response.json();
+          if (skills.length === 0) {
+            renderMessage("No skills matched this description.", "empty");
+          } else {
+            renderSkills(skills);
+          }
+        } catch (error) {
+          renderMessage(`Something went wrong: ${error.message}`, "error");
+        } finally {
+          submitButton.disabled = false;
+        }
+      }
+
+      form.addEventListener("submit", extractSkills);
+
+      textarea.addEventListener("keydown", (event) => {
+        if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+          form.requestSubmit();
+        }
+      });
+    </script>
+  </body>
+</html>

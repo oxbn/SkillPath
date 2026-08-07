@@ -1,0 +1,238 @@
+:root {
+  --bg: #fbfbfa;
+  --surface: #ffffff;
+  --border: #e4e2dd;
+  --text: #1f1e1c;
+  --muted: #6b6862;
+  --accent: #b34a1f;
+  --accent-text: #ffffff;
+  --badge-bg: #fdefe6;
+  --badge-text: #a8431b;
+  --error: #a32b24;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #191817;
+    --surface: #211f1e;
+    --border: #383533;
+    --text: #f1efec;
+    --muted: #a39e97;
+    --accent: #d8623a;
+    --accent-text: #191817;
+    --badge-bg: #3a251c;
+    --badge-text: #e89a76;
+    --error: #e8837c;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 2.5rem 1.25rem 4rem;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+main {
+  max-width: 46rem;
+  margin: 0 auto;
+}
+
+header {
+  margin-bottom: 1.75rem;
+}
+
+h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.85rem;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--muted);
+}
+
+textarea {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+
+button {
+  padding: 0.6rem 1.15rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+#results {
+  margin-top: 2.25rem;
+}
+
+#results h2 {
+  margin: 0 0 0.9rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.skill-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.skill-list li {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.skill-list li:first-child {
+  border-top: none;
+}
+
+.skill-name {
+  font-weight: 600;
+}
+
+.skill-category {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+.badge {
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--badge-bg);
+  color: var(--badge-text);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+}
+
+input[type="text"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.subtitle a {
+  color: var(--accent);
+}
+
+.market-list {
+  counter-reset: rank;
+}
+
+.market-list li {
+  align-items: center;
+}
+
+.bar {
+  flex: 1;
+  min-width: 4rem;
+  height: 6px;
+  margin-left: auto;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.skill-share {
+  min-width: 2.75rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.badge-warn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.message {
+  margin: 0;
+  padding: 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  color: var(--muted);
+}
+
+.message.error {
+  border-style: solid;
+  border-color: var(--error);
+  color: var(--error);
+}
