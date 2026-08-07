@@ -1,0 +1,5 @@
+[tool.pytest.ini_options]
+# There is no __init__.py anywhere, so without this pytest puts only tests/ on sys.path and
+# `import backend...` fails.
+pythonpath = ["."]
+testpaths = ["tests"]
