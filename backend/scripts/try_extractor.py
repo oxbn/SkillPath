@@ -46,8 +46,11 @@ def print_skills(skills):
 
     width = max(len(skill["display_name"]) for skill in skills)
     for skill in skills:
-        hot = " [hot]" if skill["hot_technology"] else ""
-        print(f"  {skill['display_name']:<{width}}  {skill['category']}{hot}")
+        # Only worth showing when the text said something other than the canonical name.
+        via = [m for m in skill["mentions"] if m.lower() != skill["display_name"].lower()]
+        detail = f" via {', '.join(repr(m) for m in via)}" if via else ""
+        repeats = f" x{skill['count']}" if skill["count"] > 1 else ""
+        print(f"  {skill['display_name']:<{width}}{repeats}{detail}  ({skill['category']})")
 
 
 def main():
@@ -68,7 +71,7 @@ def main():
     args = parser.parse_args()
 
     job_text = read_job_text(args.job_file)
-    skills = sorted(extract_skills(job_text), key=lambda skill: skill["display_name"])
+    skills = extract_skills(job_text)
 
     if args.as_json:
         json.dump(skills, sys.stdout, indent=2)
