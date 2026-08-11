@@ -1,29 +1,60 @@
+/* Light is the authored theme. Dark is re-derived from it below, and both are reachable
+   through the header toggle, which stamps data-theme on <html>. */
 :root {
-  --bg: #fbfbfa;
+  --bg: #fafafa;
   --surface: #ffffff;
-  --border: #e4e2dd;
-  --text: #1f1e1c;
-  --muted: #6b6862;
-  --accent: #b34a1f;
+  --surface-2: #f4f4f5;
+  --border: #e4e4e7;
+  --border-strong: #d4d4d8;
+  --text: #09090b;
+  --muted: #71717a;
+  --faint: #a1a1aa;
+
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
   --accent-text: #ffffff;
-  --badge-bg: #fdefe6;
-  --badge-text: #a8431b;
-  --error: #a32b24;
+  --accent-soft: #eff6ff;
+  --accent-soft-text: #1e40af;
+
+  --error: #dc2626;
+  --error-soft: #fef2f2;
+  --error-border: #fecaca;
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  --shadow-sm: 0 1px 2px rgb(9 9 11 / 0.05);
+  --shadow: 0 1px 3px rgb(9 9 11 / 0.07), 0 1px 2px rgb(9 9 11 / 0.04);
+  --ring: 0 0 0 3px rgb(37 99 235 / 0.18);
+
+  --transition: 140ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #191817;
-    --surface: #211f1e;
-    --border: #383533;
-    --text: #f1efec;
-    --muted: #a39e97;
-    --accent: #d8623a;
-    --accent-text: #191817;
-    --badge-bg: #3a251c;
-    --badge-text: #e89a76;
-    --error: #e8837c;
-  }
+:root[data-theme="dark"] {
+  --bg: #09090b;
+  --surface: #18181b;
+  --surface-2: #27272a;
+  --border: #27272a;
+  --border-strong: #3f3f46;
+  --text: #fafafa;
+  --muted: #a1a1aa;
+  --faint: #71717a;
+
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --accent-text: #09090b;
+  --accent-soft: #172554;
+  --accent-soft-text: #93c5fd;
+
+  --error: #f87171;
+  --error-soft: #2a1414;
+  --error-border: #7f1d1d;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow: 0 1px 3px rgb(0 0 0 / 0.5), 0 1px 2px rgb(0 0 0 / 0.3);
+  --ring: 0 0 0 3px rgb(59 130 246 / 0.3);
 }
 
 * {
@@ -32,47 +63,159 @@
 
 body {
   margin: 0;
-  padding: 2.5rem 1.25rem 4rem;
   background: var(--bg);
   color: var(--text);
-  font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font:
+    16px/1.55 ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------- site chrome ---------- */
+
+.site-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.site-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 0.85rem 1.25rem;
+}
+
+.wordmark {
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.wordmark:hover {
+  color: var(--text);
+  text-decoration: none;
+  opacity: 0.7;
+}
+
+/* Ghost icon button: no chrome at rest, a soft tint on hover. */
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    color var(--transition);
+}
+
+.icon-button:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.icon-button svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+/* Each icon is present in the markup; the active theme decides which one shows. */
+.icon-sun {
+  display: none;
+}
+
+:root[data-theme="dark"] .icon-sun {
+  display: block;
+}
+
+:root[data-theme="dark"] .icon-moon {
+  display: none;
 }
 
 main {
   max-width: 46rem;
   margin: 0 auto;
+  padding: 3rem 1.25rem 4rem;
 }
 
-header {
+.page-header {
   margin-bottom: 1.75rem;
 }
 
 h1 {
-  margin: 0 0 0.25rem;
-  font-size: 1.85rem;
-  letter-spacing: -0.02em;
+  margin: 0 0 0.4rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
 }
 
 .subtitle {
   margin: 0;
   color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+/* ---------- form controls ---------- */
+
+textarea,
+input[type="text"] {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  color: inherit;
+  font: inherit;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
 }
 
 textarea {
-  width: 100%;
   padding: 0.9rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
-  color: inherit;
-  font: inherit;
-  line-height: 1.5;
+  min-height: 13rem;
+  line-height: 1.55;
   resize: vertical;
 }
 
-textarea:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+input[type="text"] {
+  padding: 0.7rem 1rem;
+}
+
+textarea::placeholder,
+input[type="text"]::placeholder {
+  color: var(--faint);
+}
+
+textarea:focus-visible,
+input[type="text"]:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--ring);
 }
 
 .actions {
@@ -85,39 +228,56 @@ textarea:focus-visible {
 button {
   padding: 0.6rem 1.15rem;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--accent);
+  box-shadow: var(--shadow-sm);
   color: var(--accent-text);
   font: inherit;
-  font-weight: 600;
+  font-size: 0.9375rem;
+  font-weight: 500;
   cursor: pointer;
+  transition:
+    background var(--transition),
+    transform var(--transition),
+    opacity var(--transition);
 }
 
 button:hover:not(:disabled) {
-  filter: brightness(1.08);
+  background: var(--accent-hover);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+button:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
 }
 
 button:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: default;
 }
 
 .hint {
-  color: var(--muted);
-  font-size: 0.85rem;
+  color: var(--faint);
+  font-size: 0.8125rem;
 }
+
+/* ---------- results ---------- */
 
 #results {
-  margin-top: 2.25rem;
+  margin-top: 2.5rem;
 }
 
-#results h2 {
-  margin: 0 0 0.9rem;
-  font-size: 1rem;
-  font-weight: 600;
+.results-label {
+  margin: 0 0 0.85rem;
   color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
 }
 
 .skill-list {
@@ -125,114 +285,198 @@ button:disabled {
   padding: 0;
   list-style: none;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
 
 .skill-list li {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0.7rem 1rem;
-  background: var(--surface);
+  padding: 0.8rem 1rem;
   border-top: 1px solid var(--border);
+  transition: background var(--transition);
 }
 
 .skill-list li:first-child {
   border-top: none;
 }
 
+.skill-list li:hover {
+  background: var(--surface-2);
+}
+
+/* Name, flags and count group at the left; the category is pinned right. */
+.skill-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .skill-name {
+  font-size: 0.9375rem;
   font-weight: 600;
 }
 
-.skill-category {
-  margin-left: auto;
+.skill-count {
+  color: var(--faint);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Second line, present only when the matched text differs from the skill's name. */
+.mentions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+  min-width: 0;
+}
+
+.mention {
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.75rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Categories run long ("Business intelligence and data analysis software"), so this
+   column is capped and truncated rather than allowed to shove the row around. */
+.skill-category {
+  max-width: 45%;
+  margin-left: auto;
+  overflow: hidden;
+  color: var(--faint);
+  font-size: 0.8125rem;
   text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .badge {
   padding: 0.1rem 0.45rem;
-  border-radius: 999px;
-  background: var(--badge-bg);
-  color: var(--badge-text);
-  font-size: 0.7rem;
-  font-weight: 700;
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
+  color: var(--accent-soft-text);
+  font-size: 0.6875rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-input[type="text"] {
-  width: 100%;
-  padding: 0.7rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
-  color: inherit;
-  font: inherit;
+.badge-warn {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--muted);
 }
 
-input[type="text"]:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
+/* ---------- market list ---------- */
 
-.subtitle a {
-  color: var(--accent);
-}
-
-.market-list {
-  counter-reset: rank;
-}
-
+/* A fixed label column so every bar starts at the same x — a ragged left edge makes the
+   lengths much harder to compare, which is the whole point of the list. */
 .market-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 15rem) 1fr auto;
   align-items: center;
+  gap: 0.9rem;
+}
+
+.market-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.market-label .skill-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .bar {
-  flex: 1;
-  min-width: 4rem;
-  height: 6px;
-  margin-left: auto;
-  border-radius: 999px;
-  background: var(--border);
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
   overflow: hidden;
 }
 
 .bar-fill {
   display: block;
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--accent);
+  /* Widths are set after render, so the fills sweep out instead of appearing. */
+  transition: width 420ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .skill-share {
   min-width: 2.75rem;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
-.badge-warn {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--muted);
-}
+/* ---------- messages ---------- */
 
 .message {
   margin: 0;
   padding: 1rem;
-  border: 1px dashed var(--border);
-  border-radius: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
   color: var(--muted);
+  font-size: 0.9375rem;
 }
 
 .message.error {
-  border-style: solid;
-  border-color: var(--error);
+  border-color: var(--error-border);
+  background: var(--error-soft);
   color: var(--error);
+}
+
+/* ---------- narrow screens ---------- */
+
+@media (max-width: 640px) {
+  main {
+    padding-top: 2rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  /* The category gives up its right-hand pin and wraps onto its own line in full,
+     rather than being truncated into a few characters. */
+  .skill-head {
+    flex-wrap: wrap;
+  }
+
+  .skill-category {
+    flex-basis: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    text-align: left;
+    white-space: normal;
+  }
+
+  /* Too narrow for three columns: the label and share share a row, the bar spans below. */
+  .market-list li {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.5rem 0.75rem;
+  }
+
+  .market-list .bar {
+    grid-column: 1 / -1;
+    order: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}SkillPath{% endblock %}
+
+{% block content %}
+<header class="page-header">
+  <h1>Extract skills from a posting</h1>
+  <p class="subtitle">
+    Paste a job description to see the skills it asks for.
+    <a href="/market">See what the market asks for &rarr;</a>
+  </p>
+</header>
+
+<form id="extract-form">
+  <textarea
+    id="job-text"
+    rows="14"
+    placeholder="Paste the full job description here&#10;&#10;Then press Extract skills, or hit Ctrl+Enter."
+    autofocus
+  ></textarea>
+  <div class="actions">
+    <button type="submit" id="submit-button">Extract skills</button>
+    <span class="hint">Ctrl+Enter</span>
+  </div>
+</form>
+
+<section id="results" aria-live="polite"></section>
+{% endblock %}
+
+{% block script %}
+<script>
+  const form = document.getElementById("extract-form");
+  const textarea = document.getElementById("job-text");
+  const submitButton = document.getElementById("submit-button");
+  const results = document.getElementById("results");
+
+  // The mentions are only worth showing when they differ from the skill's display name —
+  // a chip reading "Python" under the heading "Python" is noise, not evidence.
+  function informativeMentions(skill) {
+    const folded = skill.mentions.map((mention) => mention.toLowerCase());
+    if (folded.length === 1 && folded[0] === skill.display_name.toLowerCase()) {
+      return [];
+    }
+    return skill.mentions;
+  }
+
+  function renderSkills(skills) {
+    results.replaceChildren();
+
+    const label = el("p", "results-label", `${skills.length} ${skills.length === 1 ? "skill" : "skills"} found`);
+    results.append(label);
+
+    const list = el("ul", "skill-list");
+
+    for (const skill of skills) {
+      const item = document.createElement("li");
+
+      const head = el("div", "skill-head");
+      head.append(el("span", "skill-name", skill.display_name));
+
+      if (skill.hot_technology) {
+        head.append(el("span", "badge", "hot"));
+      }
+
+      if (skill.count > 1) {
+        const count = el("span", "skill-count", `×${skill.count}`);
+        count.title = `${skill.count} mentions`;
+        head.append(count);
+      }
+
+      const category = el("span", "skill-category", skill.category);
+      category.title = skill.category;
+      head.append(category);
+
+      item.append(head);
+
+      // Most skills are written exactly as they are named, so the second line only appears
+      // for the ones where the matched text is worth seeing. Otherwise the row stays one
+      // line tall instead of reserving an empty one.
+      const mentions = informativeMentions(skill);
+      if (mentions.length > 0) {
+        const chips = el("div", "mentions");
+        for (const mention of mentions) {
+          chips.append(el("span", "mention", mention));
+        }
+        item.append(chips);
+      }
+
+      list.append(item);
+    }
+
+    results.append(list);
+  }
+
+  async function extractSkills(event) {
+    event.preventDefault();
+
+    const text = textarea.value.trim();
+    if (!text) {
+      renderMessage(results, "Paste a job description first.", "empty");
+      textarea.focus();
+      return;
+    }
+
+    submitButton.disabled = true;
+    renderMessage(results, "Extracting…", "loading");
+
+    try {
+      const { skills } = await requestJSON("/extract", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+
+      if (skills.length === 0) {
+        renderMessage(results, "No skills matched this description.", "empty");
+      } else {
+        renderSkills(skills);
+      }
+    } catch (error) {
+      renderMessage(results, error.message, "error");
+    } finally {
+      submitButton.disabled = false;
+    }
+  }
+
+  form.addEventListener("submit", extractSkills);
+
+  textarea.addEventListener("keydown", (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+      form.requestSubmit();
+    }
+  });
+</script>
+{% endblock %}

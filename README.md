@@ -77,7 +77,7 @@ It also takes a file path, or falls back to a built-in sample. `--json` prints r
 venv/bin/uvicorn app:app --reload
 ```
 
-- `/` — paste a job description, see its skills
+- `/` — paste a job description, see its skills and the text that triggered each match
 - `/market` — skill demand across every cached posting, filterable by job title
 - `POST /extract` and `GET /api/market` — the same data as JSON
 

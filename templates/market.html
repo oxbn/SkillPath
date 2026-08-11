@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}SkillPath — market{% endblock %}
+
+{% block content %}
+<header class="page-header">
+  <h1>What the market asks for</h1>
+  <p class="subtitle">
+    Skill demand across every cached job posting.
+    <a href="/">Analyze a single posting instead &rarr;</a>
+  </p>
+</header>
+
+<form id="filter-form">
+  <input
+    type="text"
+    id="title-filter"
+    placeholder="Filter by job title, e.g. engineer|data|analyst"
+    autofocus
+  />
+  <div class="actions">
+    <button type="submit" id="submit-button">Analyze</button>
+    <span class="hint" id="corpus-summary"></span>
+  </div>
+</form>
+
+<section id="results" aria-live="polite"></section>
+{% endblock %}
+
+{% block script %}
+<script>
+  const form = document.getElementById("filter-form");
+  const titleFilter = document.getElementById("title-filter");
+  const submitButton = document.getElementById("submit-button");
+  const summary = document.getElementById("corpus-summary");
+  const results = document.getElementById("results");
+
+  function renderSkills(report) {
+    results.replaceChildren();
+
+    const list = el("ol", "skill-list market-list");
+    const fills = [];
+
+    const top = report.skills[0]?.share || 1;
+
+    for (const skill of report.skills.slice(0, 40)) {
+      const item = document.createElement("li");
+
+      const label = el("div", "market-label");
+      const name = el("span", "skill-name", skill.display_name);
+      name.title = skill.display_name;
+      label.append(name);
+
+      // A high share carried by a single company is usually that company's own jargon,
+      // not market demand — worth flagging rather than hiding.
+      if (skill.companies === 1 && report.companies > 1) {
+        label.append(el("span", "badge badge-warn", "1 company"));
+      }
+
+      item.append(label);
+
+      const bar = el("span", "bar");
+      const fill = el("span", "bar-fill");
+      bar.append(fill);
+      item.append(bar);
+      fills.push([fill, (skill.share / top) * 100]);
+
+      const share = el("span", "skill-share", `${Math.round(skill.share * 100)}%`);
+      share.title = `${skill.postings} of ${report.postings} postings, ${skill.companies} companies`;
+      item.append(share);
+
+      list.append(item);
+    }
+
+    results.append(list);
+
+    // Widths are applied a frame after the fills are in the DOM so the CSS transition has
+    // a zero-width starting point to animate from.
+    requestAnimationFrame(() => {
+      for (const [fill, percent] of fills) {
+        fill.style.width = `${percent}%`;
+      }
+    });
+  }
+
+  async function analyze(event) {
+    event?.preventDefault();
+
+    submitButton.disabled = true;
+    renderMessage(results, "Analyzing…", "loading");
+
+    const query = titleFilter.value.trim();
+    const url = query ? `/api/market?title=${encodeURIComponent(query)}` : "/api/market";
+
+    try {
+      const body = await requestJSON(url);
+
+      summary.textContent = `${body.postings} postings · ${body.companies} companies · ${body.boards.join(", ")}`;
+
+      if (body.skills.length === 0) {
+        renderMessage(results, "No skills matched this corpus.", "empty");
+      } else {
+        renderSkills(body);
+      }
+    } catch (error) {
+      renderMessage(results, error.message, "error");
+    } finally {
+      submitButton.disabled = false;
+    }
+  }
+
+  form.addEventListener("submit", analyze);
+  analyze();
+</script>
+{% endblock %}

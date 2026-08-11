@@ -2,19 +2,24 @@ import re
 from functools import lru_cache
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
 from backend.market import analyze
 from backend.postings import cached_boards, load_postings, strip_boilerplate
 from backend.skills_extractor import extract_skills
 
-STATIC_DIR = Path(__file__).resolve().parent / "static"
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
 
 app = FastAPI(title="SkillPath")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+# Both pages share a layout, so they are templates rather than static files. Neither one
+# takes server-side data: they are shells the browser hydrates from /extract and /api/market.
+templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 
 class Skill(BaseModel):
@@ -35,8 +40,8 @@ class ExtractResponse(BaseModel):
 
 
 @app.get("/", include_in_schema=False)
-def read_index():
-    return FileResponse(STATIC_DIR / "index.html")
+def read_index(request: Request):
+    return templates.TemplateResponse(request, "index.html")
 
 
 @app.post("/extract")
@@ -74,8 +79,8 @@ def market_report(boards, title):
 
 
 @app.get("/market", include_in_schema=False)
-def read_market_page():
-    return FileResponse(STATIC_DIR / "market.html")
+def read_market_page(request: Request):
+    return templates.TemplateResponse(request, "market.html")
 
 
 @app.get("/api/market")
