@@ -5,20 +5,23 @@ time, but across hundreds at once.
 
 Reading a single job ad is easy; the requirements are already a bulleted list. But if you're
 deciding what to learn next, one ad tells you nothing — you need the pattern across many, and
-nobody reads 600 job ads. SkillPath pulls every opening from a set of company job boards, reads
-them all in about two seconds, and ranks skills by how many postings mention each one.
+nobody reads 1,500 job ads. SkillPath pulls every opening from a set of company job boards,
+reads them at a few milliseconds each, and ranks skills by how many postings mention each one.
 
 ```
-626 postings from 3 companies
+1531 postings from 3 companies
 
   SKILL                             SHARE  POSTINGS  COMPANIES
-  Amazon Web Services AWS software   37%       230          3
-  Python                             37%       229          3
-  Microsoft Azure software           32%       201          3
-  Apache Spark                       32%       200          3
-  Scala                              31%       193          2
-  Structured query language SQL      26%       160          3
+  Python                             25%       381          3
+  Amazon Web Services AWS software   23%       356          3
+  Structured query language SQL      23%       345          3
+  Microsoft Azure software           21%       322          3
+  Apache Spark                       20%       307          3
+  Scala                              18%       273          2
 ```
+
+*Snapshot: the stripe, databricks and figma boards, fetched 2026-08-07. These boards change
+daily, so your own numbers will differ.*
 
 No AI model and no API keys. It matches against a vocabulary of ~8,800 tool names and their
 nicknames, which is why it's fast enough to run over thousands of documents for free.
@@ -84,7 +87,8 @@ venv/bin/uvicorn app:app --reload
 ## How it works
 
 A [spaCy](https://spacy.io) `PhraseMatcher` scans tokenized text for known skill names. Only
-the tokenizer runs — no tagger, parser, or NER — which makes extraction ~2.4ms per posting.
+the tokenizer runs — no tagger, parser, or NER — which makes extraction ~2.7ms per posting, or
+about four seconds for the 1,531-posting corpus above.
 
 **The hard part isn't finding skill names, it's rejecting things that only look like them.**
 Every one of these was a real false positive found in real postings:
@@ -123,8 +127,8 @@ venv/bin/python backend/scripts/build_skills_data.py
 
 | Source | |
 |---|---|
-| `data/raw/software_skills.csv` | 8,753 entries from the US Department of Labor's [O\*NET](https://www.onetcenter.org) database; 176 are flagged "hot technology" |
-| `data/modern_skills.json` | 58 hand-maintained entries O\*NET lacks entirely — Rust, Next.js, dbt, FastAPI, Databricks |
+| `data/raw/software_skills.csv` | 8,744 entries from the US Department of Labor's [O\*NET](https://www.onetcenter.org) database; 176 are flagged "hot technology" |
+| `data/modern_skills.json` | 58 hand-maintained entries for tools O\*NET lacks or lags on — Rust, Next.js, dbt, FastAPI, Databricks |
 | `data/aliases.json` | 84 nickname mappings: `k8s` → Kubernetes, `Postgres` → PostgreSQL |
 | `data/ambiguous_names.json` | names that require capitalization |
 | `data/excluded_names.json` | O\*NET category rows like "Programming languages" that aren't products |
@@ -143,8 +147,8 @@ venv/bin/pytest
   read as `ibm terraform` and `google angular`, and why Rust and Next.js need a separate file.
 - **Single letters still misfire.** "Section C" and "see R for reference" match C and R.
   Distinguishing those needs surrounding context, not casing.
-- **Few boards means company-shaped numbers.** With three companies cached, "Scala 31%" mostly
-  means Databricks likes Scala. The report shows a company count per skill so you can spot it;
-  adding 20–30 boards is the fix.
+- **Few boards means company-shaped numbers.** With three companies cached, "Scala 18%" mostly
+  means Databricks likes Scala — it is the one row above with a company count of 2. The report
+  shows that count per skill so you can spot it; adding 20–30 boards is the fix.
 - **No path yet.** SkillPath can tell you what a market wants. Comparing that against what you
   already know, and recommending what to learn next, isn't built.
