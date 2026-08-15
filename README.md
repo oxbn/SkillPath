@@ -1,12 +1,26 @@
 # SkillPath
 
-Reads job postings and reports which skills employers actually ask for — not one posting at a
-time, but across hundreds at once.
+**Counting which skills employers actually ask for, across hundreds of job postings at once.**
 
-Reading a single job ad is easy; the requirements are already a bulleted list. But if you're
-deciding what to learn next, one ad tells you nothing — you need the pattern across many, and
-nobody reads 1,500 job ads. SkillPath pulls every opening from a set of company job boards,
-reads them at a few milliseconds each, and ranks skills by how many postings mention each one.
+## Why I built it
+
+I wanted to know which programming skills were actually worth learning next.
+
+The advice available online is mostly assertion — listicles, opinion threads, and surveys with a
+few hundred self-selected respondents. Meanwhile the primary source is sitting in the open:
+every company publishes its job openings, and those openings say exactly what that company is
+willing to pay for. Reading one is easy. The problem is that one job ad tells you nothing about
+a *market*, and nobody reads 1,500 of them.
+
+So I built something that would.
+
+## What it does
+
+**Analyze a market.** Point it at a set of company job boards and it fetches every open posting,
+reduces them to plain text, and ranks skills by how many postings mention each one. The output
+gives each skill's share of the corpus, its raw posting count, and how many distinct companies
+asked for it. A regular expression on job titles narrows the corpus to a slice of the market —
+`engineer|data|analyst` — and re-ranks on just those roles.
 
 ```
 1531 postings from 3 companies
@@ -23,8 +37,87 @@ reads them at a few milliseconds each, and ranks skills by how many postings men
 *Snapshot: the stripe, databricks and figma boards, fetched 2026-08-07. These boards change
 daily, so your own numbers will differ.*
 
+**Analyze a single posting.** Paste a job description into the web interface, or pipe it to the
+CLI, and it returns every tool the text mentions along with the exact substring that triggered
+each match. If a posting says "Postgres," the result reads *PostgreSQL, via 'Postgres'*. You can
+always see why something matched rather than trusting the output.
+
+Both modes are also available as JSON over HTTP.
+
 No AI model and no API keys. It matches against a vocabulary of ~8,800 tool names and their
 nicknames, which is why it's fast enough to run over thousands of documents for free.
+
+## The problem that turned out to be the real one
+
+My first working version told me that 36% of postings required Microsoft Excel.
+
+They didn't. It was matching the sentence *"a culture where everyone can excel."*
+
+Once I started looking, the same class of error was everywhere. Every one of these was a real
+false positive found in real postings:
+
+| Text | Wrongly matched |
+|---|---|
+| "we will **go** over it" | Go |
+| "a culture where everyone can **excel**" | Microsoft Excel — 36% of one corpus |
+| "equipping AEs and **SAs**" | SAS |
+| "cheaper than **SWIFT**" | Swift |
+| "you will **bootstrap** projects" | Bootstrap |
+| Figma's own name in Figma's job ads | Figma — 33% of one corpus |
+
+Every one of them would have produced a confident, wrong, professional-looking number.
+
+Finding skill names is the easy half of this problem. Rejecting the things that only *look* like
+skill names is the half that decides whether the output means anything. It took four separate
+mechanisms:
+
+**1. Per-pattern case sensitivity.** Names that collide with ordinary English words match only
+when capitalized. Crucially the decision is per *pattern*, not per skill: "Microsoft Excel" is
+safe to match case-insensitively, but the bare alias "Excel" is not. I derived the ambiguous set
+by intersecting single-token skill names against a system dictionary, which produced 164
+case-sensitive patterns and is committed as `backend/data/ambiguous_names.json`. Job postings
+capitalize product names roughly 99% of the time, so the recall this costs is close to nothing.
+
+**2. Longest-match-wins.** Overlapping matches resolve to the longest span, so "Microsoft SQL
+Server" beats the bare "SQL" inside it, and "C++" beats the "C" that its first token would
+otherwise match on its own.
+
+**3. Boilerplate stripping.** A company's blurb, EEO statement, and benefits list appear in
+*every* one of its postings, so anything they mention gets counted once per posting — which is
+how Figma reached 33%. Paragraphs appearing in more than 60% of a single company's postings are
+dropped. On my corpus that removes 24% of the text. A minimum-postings threshold stops this
+firing on tiny boards, where two postings sharing a line is normal rather than evidence.
+
+**4. Self-reference filtering.** A company naming itself in its own job ad isn't stating a
+requirement.
+
+Each false positive I found is now a regression test. If any of them ever comes back, the suite
+fails.
+
+## Two decisions I'd defend
+
+**Ranking by document frequency, not mention count.** A skill's score is how many postings mention
+it *at all*, not how many times the word appears. One posting saying "Python" six times must not
+outweigh six postings saying it once — the first is a writing quirk, the second is demand.
+
+**Reporting a company count next to every skill, specifically to undermine my own headline
+number.** With only three boards cached, "Scala 18%" mostly means *Databricks likes Scala* — and
+Scala is the one row in the table above with a company count of 2 rather than 3. I could have
+left that out and the numbers would have looked stronger. The count is there because a
+measurement that can't tell you when it's misleading isn't worth much.
+
+## How I know the numbers are right
+
+Not by assertion. The parts that can be checked, are:
+
+- **32 automated tests.** Most encode a specific false positive, so the fixes for "excel,"
+  "SWIFT," and "SAs" can't silently regress. Others assert that the counts quoted in this README
+  still match the actual data files — a guard added after I found the documentation had drifted
+  out of sync with the vocabulary.
+- **The example above is a verbatim transcript** of the command that produces it, not a
+  hand-typed illustration, and it's dated — the underlying job boards change daily.
+- **The matched text is always surfaced**, in both the CLI and the web UI, so any individual
+  result can be traced back to the words that caused it.
 
 ## Requirements
 
@@ -84,38 +177,51 @@ venv/bin/uvicorn app:app --reload
 - `/market` — skill demand across every cached posting, filterable by job title
 - `POST /extract` and `GET /api/market` — the same data as JSON
 
-## How it works
+## Technologies
 
-A [spaCy](https://spacy.io) `PhraseMatcher` scans tokenized text for known skill names. Only
-the tokenizer runs — no tagger, parser, or NER — which makes extraction ~2.7ms per posting, or
-about four seconds for the 1,531-posting corpus above.
+**Python 3.13**, pinned for the reason above.
 
-**The hard part isn't finding skill names, it's rejecting things that only look like them.**
-Every one of these was a real false positive found in real postings:
+**spaCy 3.8**, used deliberately sparingly. Only the tokenizer runs — no tagger, parser, or
+named-entity recognition — feeding two `PhraseMatcher` instances, one matching on lowercase and
+one on exact orthography for the case-sensitive patterns. That restraint is what makes extraction
+~2.7ms per posting, fast enough to analyze the full 1,531-posting corpus in about four seconds on
+a laptop. There is no language model in the loop and no API key anywhere in the project.
 
-| Text | Wrongly matched |
-|---|---|
-| "we will **go** over it" | Go |
-| "a culture where everyone can **excel**" | Microsoft Excel — 36% of one corpus |
-| "equipping AEs and **SAs**" | SAS |
-| "cheaper than **SWIFT**" | Swift |
-| "you will **bootstrap** projects" | Bootstrap |
-| Figma's own name in Figma's job ads | Figma — 33% of one corpus |
+**FastAPI** with Pydantic v2 response models, served by **Uvicorn**. Two pages rendered through
+**Jinja2** from a shared base template, plus a JSON API exposing exactly the same data the pages
+render. Expensive market reports are memoized in-process.
 
-Four mechanisms handle these:
+**A frontend with no framework and no build step** — vanilla JavaScript and hand-written CSS on a
+custom-property token system, with a light-first minimal design and a dark mode toggle that
+applies before first paint so the theme never flashes.
 
-- **Per-pattern case sensitivity.** Names that collide with English words match only when
-  capitalized. The list is derived by intersecting single-token skill names with a system
-  dictionary, then committed as `backend/data/ambiguous_names.json`. Postings capitalize
-  product names ~99% of the time, so the recall cost is negligible.
-- **Longest-match-wins.** "Microsoft SQL Server" beats the bare "SQL" inside it; "C++" beats
-  the "C" its first token would match.
-- **Boilerplate stripping.** Paragraphs appearing in more than 60% of one company's postings
-  are dropped, which removes blurbs, EEO statements, and benefits lists — about 24% of a
-  typical corpus.
-- **Self-reference filtering.** A company naming itself in its own posting isn't a requirement.
+**The public Greenhouse Job Board API** for data, which requires no authentication. Postings are
+cached to disk and reused until explicitly refreshed. HTML is reduced to text by a hand-written
+stripper that converts block-level tags to newlines — paragraph structure has to survive, because
+boilerplate detection works per paragraph — and unescapes entities twice, since Greenhouse
+double-escapes some of its content.
 
-Results carry the text that triggered them, so you can see *why* something matched.
+**pytest** for the suite. Everything else is standard library: `urllib`, `csv`, `json`, `html`,
+`re`, `collections`, `functools`, `argparse`.
+
+## Architecture
+
+```
+app.py                     FastAPI: 2 page routes, 2 JSON routes, static mount
+backend/
+  skills_extractor.py      PhraseMatcher over the vocabulary; returns skills + matched text
+  market.py                document-frequency aggregation, self-reference filtering
+  postings.py              Greenhouse fetch, HTML→text, disk cache, boilerplate stripping
+  scripts/                 fetch_postings, analyze_market, try_extractor, build_skills_data
+  data/                    generated vocabulary + its four hand-maintained sources
+templates/                 shared base template + the two pages
+static/                    stylesheet, shared JavaScript
+tests/
+```
+
+The layering is strict. Nothing in `backend/` knows about HTTP; the command-line tools and the
+web app are equal consumers of the same three modules. That's what made it possible to rebuild
+the entire web interface later without touching a line of the analysis code.
 
 ## The skill list
 
@@ -141,14 +247,35 @@ The build fails loudly if an alias names a skill that doesn't exist.
 venv/bin/pytest
 ```
 
-## Known limitations
+## Limitations
 
-- **O\*NET lags the industry.** It's a government occupational taxonomy, which is why entries
-  read as `ibm terraform` and `google angular`, and why Rust and Next.js need a separate file.
+Stated plainly, because they shape what the numbers actually mean:
+
+- **O\*NET lags the industry.** It's a government occupational taxonomy, which is why some
+  entries read as `ibm terraform` and `google angular`, and why modern tooling needs a separate
+  hand-maintained file.
 - **Single letters still misfire.** "Section C" and "see R for reference" match C and R.
-  Distinguishing those needs surrounding context, not casing.
-- **Few boards means company-shaped numbers.** With three companies cached, "Scala 18%" mostly
-  means Databricks likes Scala — it is the one row above with a company count of 2. The report
-  shows that count per skill so you can spot it; adding 20–30 boards is the fix.
-- **No path yet.** SkillPath can tell you what a market wants. Comparing that against what you
-  already know, and recommending what to learn next, isn't built.
+  Distinguishing those needs surrounding context, not capitalization — it's the one
+  false-positive class my four mechanisms don't solve.
+- **Few boards means company-shaped numbers.** With three companies cached, any percentage is
+  heavily influenced by one employer's hiring mix. The per-skill company count exposes this;
+  adding 20–30 boards is the real fix.
+- **The name is still aspirational.** SkillPath can tell you what a market wants. Comparing that
+  against what you already know, and recommending what to learn next, isn't built yet.
+
+## What I'd do next
+
+Broadening to 20–30 boards is the highest-value change, because it converts the output from
+"what these three companies want" into something that can reasonably be called a market. That
+also exposes a weakness I already know about: self-reference filtering currently only catches
+single-word matches, so an Amazon posting would still count "Amazon Web Services" as market
+demand for AWS.
+
+After that, the feature the name promises — take a list of what you already know, diff it against
+what the market asks for, and rank the gap by how much demand each missing skill would unlock.
+
+## Project facts
+
+Solo project, 15 commits between 31 July and 11 August 2026. About 975 lines of Python and 850 of
+front-end code, plus a generated 8,800-entry vocabulary built from public data. No AI model, no
+paid APIs, and no authentication required to reproduce any result in this document.
