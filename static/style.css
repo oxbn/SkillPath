@@ -265,6 +265,13 @@ button:disabled {
   font-size: 0.8125rem;
 }
 
+/* The board list lives in this element's tooltip; the underline is what says so. It tracks
+   the text colour rather than a border token, or it renders lighter than the text above it. */
+.companies {
+  border-bottom: 1px dotted currentColor;
+  cursor: help;
+}
+
 /* ---------- results ---------- */
 
 #results {

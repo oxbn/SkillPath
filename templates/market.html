@@ -95,7 +95,11 @@
     try {
       const body = await requestJSON(url);
 
-      summary.textContent = `${body.postings} postings · ${body.companies} companies · ${body.boards.join(", ")}`;
+      // Thirty-odd board names wrapped to three lines and crowded the form, so the list
+      // moves into a tooltip and only the count stays on screen.
+      const companies = el("span", "companies", `${body.companies} companies`);
+      companies.title = body.boards.join(", ");
+      summary.replaceChildren(`${body.postings.toLocaleString()} postings · `, companies);
 
       if (body.skills.length === 0) {
         renderMessage(results, "No skills matched this corpus.", "empty");
