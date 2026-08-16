@@ -16,26 +16,31 @@ So I built something that would.
 
 ## What it does
 
-**Analyze a market.** Point it at a set of company job boards and it fetches every open posting,
-reduces them to plain text, and ranks skills by how many postings mention each one. The output
-gives each skill's share of the corpus, its raw posting count, and how many distinct companies
-asked for it. A regular expression on job titles narrows the corpus to a slice of the market —
-`engineer|data|analyst` — and re-ranks on just those roles.
+**Analyze a market.** It fetches every open posting from 35 company job boards across Greenhouse
+and Ashby, reduces them to plain text, and ranks skills by how many postings mention each one.
+The output gives each skill's share of the corpus, its raw posting count, and how many distinct
+companies asked for it. A regular expression on job titles narrows the corpus to a slice of the
+market — `engineer|data|analyst` — and re-ranks on just those roles in about 40ms.
 
 ```
-1531 postings from 3 companies
+7533 postings from 35 companies
 
   SKILL                             SHARE  POSTINGS  COMPANIES
-  Python                             25%       381          3
-  Amazon Web Services AWS software   23%       356          3
-  Structured query language SQL      23%       345          3
-  Microsoft Azure software           21%       322          3
-  Apache Spark                       20%       307          3
-  Scala                              18%       273          2
+  Python                             22%      1691         35
+  Amazon Web Services AWS software   15%      1106         33
+  Structured query language SQL      14%      1086         34
+  Go                                 12%       921         32
+  Salesforce software                10%       746         33
+  Microsoft Azure software           10%       735         26
 ```
 
-*Snapshot: the stripe, databricks and figma boards, fetched 2026-08-07. These boards change
-daily, so your own numbers will differ.*
+*Snapshot: 35 boards, fetched 2026-08-16. These boards change daily, so your own numbers will
+differ.*
+
+The company count is the column that matters. Every skill above is asked for by at least 26 of
+the 35 companies, which is what separates a market signal from one employer's stack — on a
+three-company corpus the same table put Scala at 18% and Apache Spark at 20%, and both were
+really just Databricks.
 
 **Analyze a single posting.** Paste a job description into the web interface, or pipe it to the
 CLI, and it returns every tool the text mentions along with the exact substring that triggered
@@ -89,7 +94,10 @@ dropped. On my corpus that removes 24% of the text. A minimum-postings threshold
 firing on tiny boards, where two postings sharing a line is normal rather than evidence.
 
 **4. Self-reference filtering.** A company naming itself in its own job ad isn't stating a
-requirement.
+requirement. Matching is done at a word boundary rather than by equality, which is what catches
+Elastic writing "Elasticsearch" or Amazon writing "Amazon Web Services" — 3,911 such mentions are
+filtered out of the current corpus. The boundary is the safe part: a plain substring test would
+suppress **Dropbox** for a company named **Box**.
 
 Each false positive I found is now a regression test. If any of them ever comes back, the suite
 fails.
@@ -101,16 +109,18 @@ it *at all*, not how many times the word appears. One posting saying "Python" si
 outweigh six postings saying it once — the first is a writing quirk, the second is demand.
 
 **Reporting a company count next to every skill, specifically to undermine my own headline
-number.** With only three boards cached, "Scala 18%" mostly means *Databricks likes Scala* — and
-Scala is the one row in the table above with a company count of 2 rather than 3. I could have
-left that out and the numbers would have looked stronger. The count is there because a
-measurement that can't tell you when it's misleading isn't worth much.
+number.** This is the decision that paid off most. On a three-company corpus the report showed
+Scala at 18% and Apache Spark at 20% — but their company counts were 2 and 3, and both numbers
+were really just Databricks. Widening to 35 companies dropped Scala out of the top twelve
+entirely and cut Spark to 6%. The count is what made those two rows visibly untrustworthy
+*before* I had the data to prove it, and a measurement that can't tell you when it's misleading
+isn't worth much.
 
 ## How I know the numbers are right
 
 Not by assertion. The parts that can be checked, are:
 
-- **32 automated tests.** Most encode a specific false positive, so the fixes for "excel,"
+- **57 automated tests.** Most encode a specific false positive, so the fixes for "excel,"
   "SWIFT," and "SAs" can't silently regress. Others assert that the counts quoted in this README
   still match the actual data files — a guard added after I found the documentation had drifted
   out of sync with the vocabulary.
@@ -135,21 +145,43 @@ venv/bin/pip install -r requirements.txt   # includes the en_core_web_sm model
 
 ### Analyze a market
 
-Fetch some boards, then report on them. Board tokens are the company's Greenhouse slug — the
-`acme` in `boards.greenhouse.io/acme`. No auth needed; these endpoints are public.
+Fetch the boards, then report on them. With no arguments the fetcher works through
+`backend/data/boards.json`, the committed list of 35 validated boards. No auth needed; these
+endpoints are public.
 
 ```bash
-venv/bin/python -m backend.scripts.fetch_postings stripe databricks figma
+venv/bin/python -m backend.scripts.fetch_postings
 venv/bin/python -m backend.scripts.analyze_market --title "data|analyst"
 ```
 
-Postings are cached under `backend/data/postings/` and reused until you pass `--refresh`.
+Fetching takes a few minutes and is the slow part; analysis afterwards is instant, because
+**skills are extracted once at fetch time**, not on every report. Each board produces two files:
+the full postings under `backend/data/postings/` (~50 MB) and a slim index of company, title and
+skill names under `backend/data/index/` (~1 MB). Only the index is read when analyzing, which is
+why a 7,500-posting report comes back in about 40ms rather than 20 seconds.
+
+Editing the skill list invalidates every index. Rebuilding them does **not** need the network:
+
+```bash
+venv/bin/python -m backend.scripts.fetch_postings --reextract
+```
+
+Each index records a fingerprint of the vocabulary it was built against, and loading refuses a
+mismatch rather than quietly reporting stale numbers.
+
+To add a board, `--add` validates the token against its API first — roughly 40% of plausible
+company names are dead slugs — and only appends it if postings come back:
+
+```bash
+venv/bin/python -m backend.scripts.fetch_postings --add anthropic --source greenhouse
+venv/bin/python -m backend.scripts.fetch_postings --add linear --source ashby
+```
 
 | Flag | |
 |---|---|
 | `--title REGEX` | only postings whose title matches, e.g. `"engineer\|data"` |
 | `--limit N` | how many skills to show (default 30) |
-| `--keep-boilerplate` | skip boilerplate stripping, to check it didn't remove something real |
+| `--keep-boilerplate` | skip boilerplate stripping, to check it didn't remove something real. Re-extracts from raw text, so it is much slower than a normal run |
 | `--json` | machine-readable output |
 
 ### Analyze a single posting
@@ -184,8 +216,8 @@ venv/bin/uvicorn app:app --reload
 **spaCy 3.8**, used deliberately sparingly. Only the tokenizer runs — no tagger, parser, or
 named-entity recognition — feeding two `PhraseMatcher` instances, one matching on lowercase and
 one on exact orthography for the case-sensitive patterns. That restraint is what makes extraction
-~2.7ms per posting, fast enough to analyze the full 1,531-posting corpus in about four seconds on
-a laptop. There is no language model in the loop and no API key anywhere in the project.
+~2.7ms per posting — about 23 seconds for all 7,533, paid once at fetch time rather than on every
+report. There is no language model in the loop and no API key anywhere in the project.
 
 **FastAPI** with Pydantic v2 response models, served by **Uvicorn**. Two pages rendered through
 **Jinja2** from a shared base template, plus a JSON API exposing exactly the same data the pages
@@ -195,11 +227,13 @@ render. Expensive market reports are memoized in-process.
 custom-property token system, with a light-first minimal design and a dark mode toggle that
 applies before first paint so the theme never flashes.
 
-**The public Greenhouse Job Board API** for data, which requires no authentication. Postings are
-cached to disk and reused until explicitly refreshed. HTML is reduced to text by a hand-written
-stripper that converts block-level tags to newlines — paragraph structure has to survive, because
-boilerplate detection works per paragraph — and unescapes entities twice, since Greenhouse
-double-escapes some of its content.
+**The public Greenhouse and Ashby job board APIs** for data, neither of which requires
+authentication. Both are mapped onto one posting shape so nothing downstream knows the
+difference. Greenhouse returns HTML, reduced to text by a hand-written stripper that converts
+block-level tags to newlines — paragraph structure has to survive, because boilerplate detection
+works per paragraph — and unescapes entities twice, since Greenhouse double-escapes some of its
+content. Ashby returns `descriptionPlain` and needs no stripping at all. Postings are cached to
+disk and reused until explicitly refreshed.
 
 **pytest** for the suite. Everything else is standard library: `urllib`, `csv`, `json`, `html`,
 `re`, `collections`, `functools`, `argparse`.
@@ -211,9 +245,10 @@ app.py                     FastAPI: 2 page routes, 2 JSON routes, static mount
 backend/
   skills_extractor.py      PhraseMatcher over the vocabulary; returns skills + matched text
   market.py                document-frequency aggregation, self-reference filtering
-  postings.py              Greenhouse fetch, HTML→text, disk cache, boilerplate stripping
+  postings.py              Greenhouse/Ashby fetch, HTML→text, disk cache, boilerplate
+                           stripping, index read/write + vocabulary fingerprint
   scripts/                 fetch_postings, analyze_market, try_extractor, build_skills_data
-  data/                    generated vocabulary + its four hand-maintained sources
+  data/                    boards.json, generated vocabulary + its hand-maintained sources
 templates/                 shared base template + the two pages
 static/                    stylesheet, shared JavaScript
 tests/
@@ -257,25 +292,29 @@ Stated plainly, because they shape what the numbers actually mean:
 - **Single letters still misfire.** "Section C" and "see R for reference" match C and R.
   Distinguishing those needs surrounding context, not capitalization — it's the one
   false-positive class my four mechanisms don't solve.
-- **Few boards means company-shaped numbers.** With three companies cached, any percentage is
-  heavily influenced by one employer's hiring mix. The per-skill company count exposes this;
-  adding 20–30 boards is the real fix.
+- **Still only 35 companies, and they are not a random sample.** The list skews to US technology
+  firms that publish on Greenhouse or Ashby, so the numbers describe that slice and not "the job
+  market". The per-skill company count is there so you can see how broadly any figure is
+  supported.
+- **Some companies write tool-free job ads.** Cursor's 114 postings average 0.7 recognised skills
+  each because they are written in aspirational language rather than lists of technologies. Those
+  postings still count toward the denominator, which is honest but dilutes every share.
 - **The name is still aspirational.** SkillPath can tell you what a market wants. Comparing that
   against what you already know, and recommending what to learn next, isn't built yet.
 
 ## What I'd do next
 
-Broadening to 20–30 boards is the highest-value change, because it converts the output from
-"what these three companies want" into something that can reasonably be called a market. That
-also exposes a weakness I already know about: self-reference filtering currently only catches
-single-word matches, so an Amazon posting would still count "Amazon Web Services" as market
-demand for AWS.
+Widening the board list further, and away from US technology companies in particular. 35 boards
+was enough to kill the worst single-company distortions, but the sample still describes one slice
+of one industry. Adding more sources — Workable and SmartRecruiters both publish open endpoints —
+would reach smaller and non-US employers that Greenhouse and Ashby miss.
 
 After that, the feature the name promises — take a list of what you already know, diff it against
 what the market asks for, and rank the gap by how much demand each missing skill would unlock.
 
 ## Project facts
 
-Solo project, 15 commits between 31 July and 11 August 2026. About 975 lines of Python and 850 of
-front-end code, plus a generated 8,800-entry vocabulary built from public data. No AI model, no
-paid APIs, and no authentication required to reproduce any result in this document.
+Solo project, started 31 July 2026. About 1,460 lines of Python and 850 of front-end code, plus a
+generated 8,800-entry vocabulary built from public data and a corpus of 7,533 job postings from
+35 companies. No AI model, no paid APIs, and no authentication required to reproduce any result
+in this document.

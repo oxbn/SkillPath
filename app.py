@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
 from backend.market import analyze
-from backend.postings import cached_boards, load_postings, strip_boilerplate
+from backend.postings import StaleIndexError, cached_boards, index_path, load_index
 from backend.skills_extractor import extract_skills
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -66,16 +66,22 @@ class MarketResponse(BaseModel):
 
 
 # The corpus only changes when the cache is refetched, so re-analyzing it on every request
-# is pure waste.
+# is pure waste. `built` is in the key rather than unused: without it a refetch would keep
+# serving the previous report forever, since boards and title alone would be unchanged.
 @lru_cache(maxsize=16)
-def market_report(boards, title):
-    postings = load_postings(list(boards))
+def market_report(boards, title, built):
+    postings = load_index(list(boards))
 
     if title:
         pattern = re.compile(title, re.IGNORECASE)
         postings = [posting for posting in postings if pattern.search(posting["title"])]
 
-    return analyze(strip_boilerplate(postings))
+    return analyze(postings)
+
+
+def corpus_version(boards):
+    """Changes whenever any index is rewritten, which is what makes the cache key honest."""
+    return tuple(index_path(board).stat().st_mtime_ns for board in boards)
 
 
 @app.get("/market", include_in_schema=False)
@@ -89,12 +95,14 @@ def read_market(title: str | None = None) -> MarketResponse:
     if not boards:
         raise HTTPException(
             status_code=404,
-            detail="No postings cached. Run: python -m backend.scripts.fetch_postings <board>",
+            detail="No postings cached. Run: python -m backend.scripts.fetch_postings",
         )
 
     try:
-        report = market_report(boards, title)
+        report = market_report(boards, title, corpus_version(boards))
     except re.error as error:
         raise HTTPException(status_code=422, detail=f"Bad title filter: {error}") from error
+    except StaleIndexError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
 
     return MarketResponse(boards=list(boards), **report)

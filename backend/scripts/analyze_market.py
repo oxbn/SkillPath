@@ -4,7 +4,7 @@ import re
 import sys
 
 from backend.market import analyze
-from backend.postings import cached_boards, load_postings, strip_boilerplate
+from backend.postings import StaleIndexError, cached_boards, load_index, load_postings
 
 
 def print_report(report, limit):
@@ -53,16 +53,19 @@ def main():
     if not boards:
         parser.error("nothing cached yet — run backend.scripts.fetch_postings first")
 
-    postings = load_postings(boards)
+    # The index already has boilerplate stripped and skills extracted, so it is both the fast
+    # path and the normal one. --keep-boilerplate exists to check that stripping didn't remove
+    # something real, which means going back to the raw text and re-extracting.
+    try:
+        postings = load_postings(boards) if args.keep_boilerplate else load_index(boards)
+    except StaleIndexError as error:
+        parser.error(str(error))
 
     if args.title:
         pattern = re.compile(args.title, re.IGNORECASE)
         postings = [p for p in postings if pattern.search(p["title"])]
         if not postings:
             parser.error(f"no posting titles matched {args.title!r}")
-
-    if not args.keep_boilerplate:
-        postings = strip_boilerplate(postings)
 
     report = analyze(postings)
 

@@ -21,6 +21,10 @@ skill_matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
 cased_skill_matcher = PhraseMatcher(nlp.vocab, attr="ORTH")
 
 skills_by_match_id = {}
+# Lets a precomputed skill name from the index be resolved back to its display name and
+# category without re-running the matcher.
+SKILLS_BY_NAME = {}
+
 for skill in SKILLS:
     match_id = nlp.vocab.strings[skill["name"]]
 
@@ -29,6 +33,7 @@ for skill in SKILLS:
         matcher.add(skill["name"], [nlp.make_doc(pattern["text"])])
 
     skills_by_match_id[match_id] = skill
+    SKILLS_BY_NAME[skill["name"]] = skill
 
 
 def extract_skills(job_text):

@@ -1,15 +1,46 @@
 import collections
+import re
 
-from backend.skills_extractor import extract_skills
+from backend.skills_extractor import SKILLS_BY_NAME, extract_skills
+
+# Words that name a legal entity rather than the company, and would match far too much.
+COMPANY_STOPWORDS = {
+    "inc", "llc", "ltd", "limited", "corp", "corporation", "co", "company", "the",
+    "labs", "lab", "technologies", "technology", "tech", "software", "systems", "group",
+    "holdings", "solutions", "services", "io", "ai", "com",
+}
+
+
+def company_tokens(company):
+    words = (word.strip(",.()&").lower() for word in company.split())
+    return {word for word in words if len(word) > 2 and word not in COMPANY_STOPWORDS}
 
 
 def is_self_reference(skill, company):
     """A company naming itself in its own posting is not a job requirement.
 
     Boilerplate stripping removes the repeated blurb, but the per-posting prose still says it.
+
+    Matching at a word boundary rather than by equality is what catches the multi-word cases —
+    Elastic/"elasticsearch", Amazon/"amazon web services aws software". The boundary is what
+    keeps it safe: a plain substring test would suppress Dropbox for a company named Box.
     """
-    company_words = {word.strip(",.").lower() for word in company.split()}
-    return skill["name"] == company.lower() or skill["name"] in company_words
+    name = skill["name"]
+
+    return any(re.search(rf"\b{re.escape(token)}", name) for token in company_tokens(company))
+
+
+def posting_skills(posting):
+    """Precomputed skill names when the index supplied them, otherwise extract on the spot.
+
+    The fallback is what keeps --keep-boilerplate and the existing tests working on raw
+    posting dicts that have text but no precomputed skills.
+    """
+    names = posting.get("skills")
+    if names is None:
+        return extract_skills(posting["text"])
+
+    return [SKILLS_BY_NAME[name] for name in names if name in SKILLS_BY_NAME]
 
 
 def analyze(postings):
@@ -25,7 +56,7 @@ def analyze(postings):
     for posting in postings:
         company = posting.get("company", "")
 
-        for skill in extract_skills(posting["text"]):
+        for skill in posting_skills(posting):
             if is_self_reference(skill, company):
                 continue
 
