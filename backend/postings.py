@@ -33,7 +33,7 @@ def strip_html(content):
 
 
 def fetch_board(board):
-    """Fetch every posting on a public Greenhouse board. No auth required."""
+    """These boards are public; no auth required."""
     with urllib.request.urlopen(GREENHOUSE_URL.format(board=board), timeout=60) as response:
         jobs = json.load(response)["jobs"]
 
@@ -65,7 +65,6 @@ def cached_boards():
 
 
 def load_board(board, refresh=False):
-    """Return a board's postings, fetching and caching them unless a cache already exists."""
     path = cache_path(board)
 
     if not refresh and path.exists():

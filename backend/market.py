@@ -6,9 +6,7 @@ from backend.skills_extractor import extract_skills
 def is_self_reference(skill, company):
     """A company naming itself in its own posting is not a job requirement.
 
-    Figma's postings mention Figma constantly, which put it in 33% of a test corpus purely
-    from its own marketing copy. Boilerplate stripping removes the repeated blurb, but the
-    per-posting prose still says it.
+    Boilerplate stripping removes the repeated blurb, but the per-posting prose still says it.
     """
     company_words = {word.strip(",.").lower() for word in company.split()}
     return skill["name"] == company.lower() or skill["name"] in company_words

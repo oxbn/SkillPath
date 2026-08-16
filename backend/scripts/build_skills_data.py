@@ -51,8 +51,6 @@ def build_skills():
                 "display_name": display_name,
                 "category": row["Element Name"].strip(),
                 "hot_technology": row["Hot Technology"] == "Y",
-                # Every surface form the matcher looks for, each with its own casing rule.
-                # "Microsoft Excel" is safe folded; the alias "Excel" is not.
                 "patterns": [{"text": display_name, "case_sensitive": key in ambiguous}],
             }
 

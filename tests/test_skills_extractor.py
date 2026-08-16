@@ -34,7 +34,6 @@ def test_standalone_c_still_matches():
 
 
 def test_nested_sql_is_suppressed():
-    # "Microsoft SQL Server" contains the token SQL; only the longer match should survive.
     found = matched("Experience with Microsoft SQL Server.")
 
     assert "Microsoft SQL Server" in found
@@ -94,11 +93,8 @@ def test_count_tracks_repeats_and_orders_results():
 
 
 def test_names_that_are_english_words_require_capitalization():
-    """The deliberate trade-off of expanding past the 176 hot skills.
-
-    "Python" is a dictionary word, so it matches only when capitalized. Postings capitalize
-    product names almost always — lowercase spellings were ~1% of mentions in a real corpus —
-    and this is what keeps "we analyze data to reduce cost" from matching two products.
+    """The deliberate trade-off of expanding past the 176 hot skills: names that are also
+    dictionary words match only when capitalized.
     """
     assert "Python" in matched("Strong Python experience.")
     assert "Python" not in matched("a python is a snake")

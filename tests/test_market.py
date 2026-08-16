@@ -31,7 +31,6 @@ def test_boilerplate_repeated_across_a_company_is_removed():
 
 
 def test_small_boards_are_left_alone():
-    # Below the minimum, "in most postings" is noise — two postings sharing a line is normal.
     postings = [posting("Tiny", "Shared line.\nRole A.") for _ in range(2)]
 
     stripped = strip_boilerplate(postings)

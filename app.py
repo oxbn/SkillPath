@@ -17,8 +17,8 @@ STATIC_DIR = BASE_DIR / "static"
 app = FastAPI(title="SkillPath")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-# Both pages share a layout, so they are templates rather than static files. Neither one
-# takes server-side data: they are shells the browser hydrates from /extract and /api/market.
+# Neither page takes server-side data: they are shells the browser hydrates from /extract
+# and /api/market.
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 
@@ -65,8 +65,8 @@ class MarketResponse(BaseModel):
     skills: list[MarketSkill]
 
 
-# Analyzing 600+ postings takes a couple of seconds, and the corpus only changes when the
-# cache is refetched, so a request-level cache keeps the page responsive.
+# The corpus only changes when the cache is refetched, so re-analyzing it on every request
+# is pure waste.
 @lru_cache(maxsize=16)
 def market_report(boards, title):
     postings = load_postings(list(boards))

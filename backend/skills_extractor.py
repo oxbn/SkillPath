@@ -59,8 +59,8 @@ def extract_skills(job_text):
             matched_skills[skill["name"]] = match
 
         match["count"] += 1
-        # Distinct surface forms, first-seen casing. Folding here keeps ["Python", "python"]
-        # from reading as two different ways the skill was written.
+        # Folding here keeps ["Python", "python"] from reading as two different ways the
+        # skill was written.
         if span.text.lower() not in [mention.lower() for mention in match["mentions"]]:
             match["mentions"].append(span.text)
 
