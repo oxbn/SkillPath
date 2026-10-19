@@ -24,6 +24,11 @@
   </div>
 </form>
 
+<div class="actions">
+  <button type="button" id="refresh-button">Refresh now</button>
+  <span class="hint" id="refresh-status" role="status"></span>
+</div>
+
 <section id="results" aria-live="polite"></section>
 {% endblock %}
 
@@ -114,6 +119,43 @@
   }
 
   form.addEventListener("submit", analyze);
-  analyze();
+  const refreshButton = document.getElementById("refresh-button");
+  const refreshStatus = document.getElementById("refresh-status");
+  let wasRefreshing = false;
+  let initialStatus = true;
+
+  async function updateStatus() {
+    try {
+      const status = await requestJSON("/api/refresh");
+      refreshButton.disabled = status.running;
+      const updated = status.last_updated
+        ? `Last successful update: ${new Date(status.last_updated).toLocaleString()}.`
+        : "Preparing market data for the first time.";
+      const failures = status.failed_boards.length
+        ? ` Could not update: ${status.failed_boards.join(", ")}. Will retry automatically.`
+        : "";
+      refreshStatus.textContent = status.running ? `Refreshing… ${updated}` : updated + failures;
+      if ((wasRefreshing && !status.running) || initialStatus) await analyze();
+      wasRefreshing = status.running;
+      initialStatus = false;
+    } catch (error) {
+      refreshStatus.textContent = error.message;
+    } finally {
+      setTimeout(updateStatus, 5000);
+    }
+  }
+
+  refreshButton.addEventListener("click", async () => {
+    refreshButton.disabled = true;
+    try {
+      await requestJSON("/api/refresh", {method: "POST"});
+      wasRefreshing = true;
+      refreshStatus.textContent = "Refreshing market data…";
+    } catch (error) {
+      refreshStatus.textContent = error.message;
+      refreshButton.disabled = false;
+    }
+  });
+  updateStatus();
 </script>
 {% endblock %}

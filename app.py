@@ -1,4 +1,7 @@
 import re
+from contextlib import asynccontextmanager
+
+from backend.refresh import Refresher
 from functools import lru_cache
 from pathlib import Path
 
@@ -14,7 +17,37 @@ from backend.skills_extractor import extract_skills
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 
-app = FastAPI(title="SkillPath")
+refresher = Refresher()
+
+
+@asynccontextmanager
+async def lifespan(app):
+    refresher.start()
+    try:
+        yield
+    finally:
+        # Network requests have a bounded timeout; finish the current board on shutdown.
+        import asyncio
+        await asyncio.to_thread(refresher.stop)
+
+
+app = FastAPI(title="SkillPath", lifespan=lifespan)
+
+
+@app.get("/api/refresh")
+def refresh_status():
+    return refresher.status()
+
+
+@app.post("/api/refresh", status_code=202)
+def refresh_market(request: Request):
+    # Browser requests must originate from this app (also prevents cross-site triggers).
+    origin = request.headers.get("origin")
+    if origin and origin != str(request.base_url).rstrip("/"):
+        raise HTTPException(status_code=403, detail="Refresh must be requested from this app.")
+    started = refresher.start_refresh(force=True)
+    return {"started": started, **refresher.status()}
+
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # Neither page takes server-side data: they are shells the browser hydrates from /extract
@@ -95,7 +128,7 @@ def read_market(title: str | None = None) -> MarketResponse:
     if not boards:
         raise HTTPException(
             status_code=404,
-            detail="No postings cached. Run: python -m backend.scripts.fetch_postings",
+            detail="Preparing market data. The first fetch takes a few minutes; this page will update automatically.",
         )
 
     try:

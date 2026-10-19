@@ -129,6 +129,73 @@ Not by assertion. The parts that can be checked, are:
 - **The matched text is always surfaced**, in both the CLI and the web UI, so any individual
   result can be traced back to the words that caused it.
 
+## Personal use with containers (recommended)
+
+### Fedora / Fedora Asahi Remix: Podman
+
+Install Podman and its Compose provider:
+
+```bash
+sudo dnf install podman podman-compose
+```
+
+From the project directory, run as your regular user (without `sudo`):
+
+```bash
+podman compose up -d --build
+```
+
+If Podman reports `looking up compose provider failed`, check that `podman-compose` is
+installed. The optional `podman-docker` package provides a `docker` command that uses Podman;
+it is not required for these commands and can stay installed.
+
+### Docker
+
+Install Docker Engine with the Compose plugin (or Docker Desktop), then run:
+
+```bash
+docker compose up -d --build
+```
+
+### Access, data, and maintenance
+
+Open **http://localhost:8000** or **http://localhost:8000/market**.
+The app is accessible only from this computer. Python 3.13 and dependencies are installed
+inside the container image, not in your computer's Python environment; no local Python setup
+or manual fetch is needed. Images and cached data use disk space on your computer.
+
+On first startup, market data is fetched in the background. This takes a few minutes;
+single-posting analysis works immediately. The market page updates automatically when the
+fetch finishes. Existing data remains available during later refreshes. The app checks hourly
+for data older than 24 hours, and the **Refresh now** button starts an immediate refresh.
+Failed boards are listed on the page and retried at the next check. Vocabulary changes
+trigger automatic re-extraction from cached postings.
+
+Postings, indexes, and refresh status live in a named container volume and survive container
+rebuilds. Only generated cache data goes in the volume; vocabulary files remain in the image.
+
+```bash
+podman compose logs -f       # view logs; Ctrl+C stops following logs
+podman compose down          # stop the app; keep cached data
+podman compose up -d --build # start again, or rebuild after code changes
+```
+
+For Docker, use the equivalent commands:
+
+```bash
+docker compose logs -f       # view logs; Ctrl+C stops following logs
+docker compose down          # stop the app; keep cached data
+docker compose up -d --build # start again, or rebuild after code changes
+```
+
+Avoid `podman compose down -v` or `docker compose down -v` unless you want to delete cached
+data. With Docker, the container restarts with Docker unless explicitly stopped; Docker must
+be running. For Podman startup after reboot, configure a systemd/Quadlet service separately;
+these instructions start the app manually. Automatic refresh uses one
+server process, as configured in the image. Do not add Uvicorn workers or multiple replicas.
+
+The following instructions are for running directly with Python instead.
+
 ## Requirements
 
 **Python 3.13.** spaCy publishes no wheels for 3.14 and ships no source distribution, so the

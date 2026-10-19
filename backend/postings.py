@@ -2,6 +2,8 @@ import collections
 import hashlib
 import html
 import json
+import os
+import tempfile
 import re
 import urllib.request
 from datetime import datetime, timezone
@@ -9,10 +11,11 @@ from functools import lru_cache
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-POSTINGS_DIR = BASE_DIR / "data" / "postings"
+CACHE_DIR = Path(os.environ.get("SKILLPATH_CACHE_DIR", BASE_DIR / "data"))
+POSTINGS_DIR = CACHE_DIR / "postings"
 # Skills are extracted once at fetch time and kept here. Analysis reads only these, so it never
 # has to parse the tens of megabytes of posting text sitting in POSTINGS_DIR.
-INDEX_DIR = BASE_DIR / "data" / "index"
+INDEX_DIR = CACHE_DIR / "index"
 BOARDS_PATH = BASE_DIR / "data" / "boards.json"
 SKILLS_PATH = BASE_DIR / "data" / "skills.json"
 
@@ -152,18 +155,12 @@ def load_board(board, refresh=False, source="greenhouse"):
 
     postings = fetch_board(board, source)
 
-    POSTINGS_DIR.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as cache_file:
-        json.dump(
-            {
-                "board": board,
-                "source": source,
-                "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                "postings": postings,
-            },
-            cache_file,
-            indent=2,
-        )
+    atomic_json(path, {
+        "board": board,
+        "source": source,
+        "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "postings": postings,
+    })
 
     return postings
 
@@ -178,18 +175,28 @@ def load_postings(boards):
 
 
 def write_index(board, records, source="greenhouse"):
-    INDEX_DIR.mkdir(parents=True, exist_ok=True)
-    with open(index_path(board), "w", encoding="utf-8") as index_file:
-        json.dump(
-            {
-                "board": board,
-                "source": source,
-                "built_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                "vocabulary": vocabulary_fingerprint(),
-                "postings": records,
-            },
-            index_file,
-        )
+    atomic_json(index_path(board), {
+        "board": board,
+        "source": source,
+        "built_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "vocabulary": vocabulary_fingerprint(),
+        "postings": records,
+    })
+
+
+def atomic_json(path, value):
+    """Readers see either the previous complete file or the new complete file."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    name = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
+                                         suffix=".tmp", delete=False) as output:
+            name = output.name
+            json.dump(value, output)
+        os.replace(name, path)
+    finally:
+        if name and os.path.exists(name):
+            os.unlink(name)
 
 
 class StaleIndexError(RuntimeError):

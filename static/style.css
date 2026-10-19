@@ -6,6 +6,9 @@
   --surface-2: #f4f4f5;
   --border: #e4e4e7;
   --border-strong: #d4d4d8;
+  /* Sits inside rows that tint to --surface-2 on hover, so it must differ from both that and
+     --surface, or bar tracks vanish under the cursor. */
+  --track: #e4e4e7;
   --text: #09090b;
   --muted: #71717a;
   --faint: #a1a1aa;
@@ -38,6 +41,7 @@
   --surface-2: #27272a;
   --border: #27272a;
   --border-strong: #3f3f46;
+  --track: #3f3f46;
   --text: #fafafa;
   --muted: #a1a1aa;
   --faint: #71717a;
@@ -116,31 +120,33 @@ a:hover {
   opacity: 0.7;
 }
 
-/* Ghost icon button: no chrome at rest, a soft tint on hover. */
+/* Carries its own outline and fill at rest. A ghost button here read as decoration rather
+   than a control — there is nothing else in the header to group it with. */
 .icon-button {
   display: grid;
   place-items: center;
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
   padding: 0;
-  border: none;
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--muted);
+  background: var(--surface-2);
+  color: var(--text);
   cursor: pointer;
   transition:
     background var(--transition),
+    border-color var(--transition),
     color var(--transition);
 }
 
 .icon-button:hover {
-  background: var(--surface-2);
-  color: var(--text);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .icon-button svg {
-  width: 1.05rem;
-  height: 1.05rem;
+  width: 1.15rem;
+  height: 1.15rem;
 }
 
 /* Each icon is present in the markup; the active theme decides which one shows. */
@@ -341,7 +347,8 @@ button:disabled {
 
 .mention {
   padding: 0.05rem 0.4rem;
-  border: 1px solid var(--border);
+  /* --border matches --surface-2 in dark, which would erase the chip on row hover. */
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   background: var(--surface-2);
   color: var(--muted);
@@ -406,7 +413,7 @@ button:disabled {
 .bar {
   height: 8px;
   border-radius: var(--radius-pill);
-  background: var(--surface-2);
+  background: var(--track);
   overflow: hidden;
 }
 
