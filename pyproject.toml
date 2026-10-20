@@ -3,3 +3,5 @@
 # `import backend...` fails.
 pythonpath = ["."]
 testpaths = ["tests"]
+addopts = "-m 'not browser'"
+markers = ["browser: offline Chromium smoke tests (run with -m browser)"]

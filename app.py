@@ -1,11 +1,11 @@
-import re
 from contextlib import asynccontextmanager
+from typing import Literal
 
 from backend.refresh import Refresher
 from functools import lru_cache
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from backend.market import analyze
 from backend.postings import StaleIndexError, cached_boards, index_path, load_index
 from backend.skills_extractor import extract_skills
+from backend.title_filter import TitleFilterError, filter_titles
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
@@ -55,6 +56,13 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 
+class Evidence(BaseModel):
+    text: str
+    start: int
+    end: int
+    classification: Literal["required", "optional", "negated", "incidental", "unknown"]
+
+
 class Skill(BaseModel):
     name: str
     display_name: str
@@ -62,6 +70,7 @@ class Skill(BaseModel):
     hot_technology: bool
     mentions: list[str]
     count: int
+    evidence: list[Evidence]
 
 
 class ExtractRequest(BaseModel):
@@ -89,6 +98,16 @@ class MarketSkill(BaseModel):
     postings: int
     share: float
     companies: int
+    company_share: float
+
+
+class CorpusBoard(BaseModel):
+    board: str
+    source: str
+    fetched_at: str | None
+    built_at: str
+    vocabulary: str
+    analysis_version: str
 
 
 class MarketResponse(BaseModel):
@@ -96,20 +115,20 @@ class MarketResponse(BaseModel):
     companies: int
     boards: list[str]
     skills: list[MarketSkill]
+    corpus: list[CorpusBoard]
+    title: str | None
+    regex: bool
+    requirements_only: bool
 
 
 # The corpus only changes when the cache is refetched, so re-analyzing it on every request
 # is pure waste. `built` is in the key rather than unused: without it a refetch would keep
 # serving the previous report forever, since boards and title alone would be unchanged.
 @lru_cache(maxsize=16)
-def market_report(boards, title, built):
-    postings = load_index(list(boards))
-
-    if title:
-        pattern = re.compile(title, re.IGNORECASE)
-        postings = [posting for posting in postings if pattern.search(posting["title"])]
-
-    return analyze(postings)
+def market_report(boards, title, built, regex_mode=False, requirements_only=False):
+    postings, metadata = load_index(list(boards), include_metadata=True)
+    postings = filter_titles(postings, title, regex_mode)
+    return {**analyze(postings, requirements_only), "corpus": metadata}
 
 
 def corpus_version(boards):
@@ -123,7 +142,11 @@ def read_market_page(request: Request):
 
 
 @app.get("/api/market")
-def read_market(title: str | None = None) -> MarketResponse:
+def read_market(
+    title: str | None = Query(default=None, max_length=200),
+    regex: bool = False,
+    requirements_only: bool = False,
+) -> MarketResponse:
     boards = tuple(cached_boards())
     if not boards:
         raise HTTPException(
@@ -132,10 +155,11 @@ def read_market(title: str | None = None) -> MarketResponse:
         )
 
     try:
-        report = market_report(boards, title, corpus_version(boards))
-    except re.error as error:
-        raise HTTPException(status_code=422, detail=f"Bad title filter: {error}") from error
+        report = market_report(boards, title, corpus_version(boards), regex, requirements_only)
+    except TitleFilterError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
     except StaleIndexError as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
 
-    return MarketResponse(boards=list(boards), **report)
+    return MarketResponse(boards=list(boards), title=title, regex=regex,
+                          requirements_only=requirements_only, **report)

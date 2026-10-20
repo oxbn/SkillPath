@@ -53,7 +53,10 @@ class Refresher:
                     index = index_path(token)
                     stale = not index.exists()
                     if not stale:
-                        stale = json.loads(index.read_text()).get("vocabulary") != vocabulary_fingerprint()
+                        try:
+                            stale = json.loads(index.read_text()).get("vocabulary") != vocabulary_fingerprint()
+                        except (OSError, ValueError, AttributeError):
+                            stale = True
                     stale = stale or (raw.exists() and index.exists() and raw.stat().st_mtime_ns > index.stat().st_mtime_ns)
                     if due or stale:
                         postings = load_board(token, refresh=due, source=source)

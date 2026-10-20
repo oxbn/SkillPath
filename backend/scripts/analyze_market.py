@@ -1,10 +1,10 @@
 import argparse
 import json
-import re
 import sys
 
 from backend.market import analyze
 from backend.postings import StaleIndexError, cached_boards, load_index, load_postings
+from backend.title_filter import TitleFilterError, filter_titles
 
 
 def print_report(report, limit):
@@ -38,8 +38,10 @@ def main():
     )
     parser.add_argument(
         "--title",
-        help="only include postings whose title matches this (case-insensitive regex)",
+        help="only include titles containing this text (case-insensitive)",
     )
+    parser.add_argument("--regex", action="store_true", help="interpret --title as a bounded regex")
+    parser.add_argument("--requirements-only", action="store_true", help="count only explicit required/optional skills")
     parser.add_argument("--limit", type=int, default=30, help="how many skills to show")
     parser.add_argument(
         "--keep-boilerplate",
@@ -57,17 +59,24 @@ def main():
     # path and the normal one. --keep-boilerplate exists to check that stripping didn't remove
     # something real, which means going back to the raw text and re-extracting.
     try:
-        postings = load_postings(boards) if args.keep_boilerplate else load_index(boards)
+        if args.keep_boilerplate:
+            postings, metadata = load_postings(boards), []
+        else:
+            postings, metadata = load_index(boards, include_metadata=True)
     except StaleIndexError as error:
         parser.error(str(error))
 
     if args.title:
-        pattern = re.compile(args.title, re.IGNORECASE)
-        postings = [p for p in postings if pattern.search(p["title"])]
+        try:
+            postings = filter_titles(postings, args.title, args.regex)
+        except TitleFilterError as error:
+            parser.error(str(error))
         if not postings:
             parser.error(f"no posting titles matched {args.title!r}")
 
-    report = analyze(postings)
+    report = analyze(postings, args.requirements_only)
+    report.update(corpus=metadata, title=args.title, regex=args.regex,
+                  requirements_only=args.requirements_only, keep_boilerplate=args.keep_boilerplate)
 
     if args.as_json:
         json.dump(report, sys.stdout, indent=2)

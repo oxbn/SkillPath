@@ -12,9 +12,11 @@
 </header>
 
 <form id="extract-form">
+  <label for="job-text">Job description</label>
   <textarea
     id="job-text"
     rows="14"
+    maxlength="50000"
     placeholder="Paste the full job description here&#10;&#10;Then press Extract skills, or hit Ctrl+Enter."
     autofocus
   ></textarea>
@@ -73,6 +75,12 @@
       head.append(category);
 
       item.append(head);
+      const evidence = el("details", "evidence");
+      evidence.append(el("summary", "hint", "Matched context"));
+      for (const match of skill.evidence) {
+        evidence.append(el("p", "hint", `${match.classification}: ${match.text}`));
+      }
+      item.append(evidence);
 
       // Most skills are written exactly as they are named, so the second line only appears
       // for the ones where the matched text is worth seeing. Otherwise the row stays one

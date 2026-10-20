@@ -9,6 +9,7 @@ import urllib.request
 from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
+from backend.context import INCIDENTAL, REQUIREMENT, paragraphs, section_label
 
 BASE_DIR = Path(__file__).resolve().parent
 CACHE_DIR = Path(os.environ.get("SKILLPATH_CACHE_DIR", BASE_DIR / "data"))
@@ -18,6 +19,7 @@ POSTINGS_DIR = CACHE_DIR / "postings"
 INDEX_DIR = CACHE_DIR / "index"
 BOARDS_PATH = BASE_DIR / "data" / "boards.json"
 SKILLS_PATH = BASE_DIR / "data" / "skills.json"
+ANALYSIS_VERSION = "2-context"
 
 GREENHOUSE_URL = "https://boards-api.greenhouse.io/v1/boards/{board}/jobs?content=true"
 ASHBY_URL = "https://api.ashbyhq.com/posting-api/job-board/{board}"
@@ -143,7 +145,7 @@ def vocabulary_fingerprint():
     silently invalidates every index, and stale numbers that look plausible are worse than an
     error, so the fingerprint is stored alongside and checked on load.
     """
-    return hashlib.sha256(SKILLS_PATH.read_bytes()).hexdigest()[:16]
+    return hashlib.sha256(SKILLS_PATH.read_bytes() + ANALYSIS_VERSION.encode()).hexdigest()[:16]
 
 
 def load_board(board, refresh=False, source="greenhouse"):
@@ -175,11 +177,18 @@ def load_postings(boards):
 
 
 def write_index(board, records, source="greenhouse"):
+    raw = cache_path(board)
+    fetched_at = None
+    if raw.exists():
+        with raw.open(encoding="utf-8") as source_file:
+            fetched_at = json.load(source_file).get("fetched_at")
     atomic_json(index_path(board), {
         "board": board,
         "source": source,
         "built_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "vocabulary": vocabulary_fingerprint(),
+        "analysis_version": ANALYSIS_VERSION,
+        "fetched_at": fetched_at,
         "postings": records,
     })
 
@@ -203,10 +212,11 @@ class StaleIndexError(RuntimeError):
     """An index was built against a different skill list than the one now on disk."""
 
 
-def load_index(boards):
+def load_index(boards, include_metadata=False):
     """Slim per-posting records: company, title, and the skill names found in it."""
     current = vocabulary_fingerprint()
     records = []
+    metadata = []
 
     for board in boards:
         path = index_path(board)
@@ -215,8 +225,13 @@ def load_index(boards):
                 f"No index for {board!r}. Run: python -m backend.scripts.fetch_postings"
             )
 
-        with open(path, "r", encoding="utf-8") as index_file:
-            index = json.load(index_file)
+        try:
+            with open(path, "r", encoding="utf-8") as index_file:
+                index = json.load(index_file)
+            if not isinstance(index, dict) or not isinstance(index.get("postings"), list):
+                raise ValueError("Invalid index shape")
+        except (OSError, ValueError) as error:
+            raise StaleIndexError(f"Unreadable index for {board!r}. Run: python -m backend.scripts.fetch_postings --reextract") from error
 
         if index.get("vocabulary") != current:
             raise StaleIndexError(
@@ -225,8 +240,11 @@ def load_index(boards):
             )
 
         records.extend(index["postings"])
+        metadata.append({key: index.get(key) for key in (
+            "board", "source", "fetched_at", "built_at", "vocabulary", "analysis_version"
+        )})
 
-    return records
+    return (records, metadata) if include_metadata else records
 
 
 # A company's blurb, EEO statement, and benefits list appear in every one of its postings, so
@@ -263,12 +281,19 @@ def strip_boilerplate(postings, threshold=BOILERPLATE_THRESHOLD):
         common = {paragraph for paragraph, n in paragraph_counts.items() if n > limit}
 
         for posting in group:
-            paragraphs = posting["text"].split("\n")
+            parts = list(paragraphs(posting["text"]))
+            # Repetition alone is insufficient: preserve requirements and optional sections.
+            removed = [p for p, section in parts if p in common
+                       and section_label(p) is None
+                       and section not in {"required", "optional"} and not REQUIREMENT.search(p)
+                       and (section == "incidental" or INCIDENTAL.search(p))]
+            removed_set = set(removed)
             stripped.append(
                 {
                     **posting,
-                    "text": "\n".join(p for p in paragraphs if p not in common),
-                    "boilerplate": [p for p in paragraphs if p in common],
+                    "text": "\n".join(p for p, _ in parts if p not in removed_set),
+                    "boilerplate": removed,
+                    "boilerplate_reason": f"Repeated in more than {threshold:.0%} of company postings and identified as incidental company text.",
                 }
             )
 

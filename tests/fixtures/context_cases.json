@@ -1,0 +1,20 @@
+[
+  {"text": "Python experience is required.", "skill": "Python", "label": "required"},
+  {"text": "Experience building plugins with Figma.", "skill": "Figma", "label": "required"},
+  {"text": "Requirements:\nPython and Docker", "skill": "Python", "label": "required"},
+  {"text": "Qualifications\nPython", "skill": "Python", "label": "required"},
+  {"text": "Python is a plus.", "skill": "Python", "label": "optional"},
+  {"text": "Python experience preferred.", "skill": "Python", "label": "optional"},
+  {"text": "Nice to have:\nPython", "skill": "Python", "label": "optional"},
+  {"text": "Preferred qualifications:\nExperience with Python", "skill": "Python", "label": "optional"},
+  {"text": "No Python experience is required.", "skill": "Python", "label": "negated"},
+  {"text": "No prior experience with Python.", "skill": "Python", "label": "negated"},
+  {"text": "Python is not required.", "skill": "Python", "label": "negated"},
+  {"text": "Python experience is not required but Docker experience is required.", "skill": "Docker", "label": "required"},
+  {"text": "Python experience is not required but Docker experience is required.", "skill": "Python", "label": "negated"},
+  {"text": "About us:\nWe develop Python tools.", "skill": "Python", "label": "incidental"},
+  {"text": "Our mission is to improve Python tooling.", "skill": "Python", "label": "incidental"},
+  {"text": "We use Python.", "skill": "Python", "label": "unknown"},
+  {"text": "Figma is growing our team.", "skill": "Figma", "label": "unknown"},
+  {"text": "Requirements:\nPython\nBenefits:\nDocker training", "skill": "Docker", "label": "incidental"}
+]

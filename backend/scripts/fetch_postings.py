@@ -29,14 +29,17 @@ def build_index(board, source, postings):
     what we have at this point.
     """
     stripped = strip_boilerplate(postings)
-    records = [
-        {
+    records = []
+    for posting in stripped:
+        skills = extract_skills(posting["text"])
+        records.append({
             "company": posting["company"],
             "title": posting["title"],
-            "skills": [skill["name"] for skill in extract_skills(posting["text"])],
-        }
-        for posting in stripped
-    ]
+            "skills": [skill["name"] for skill in skills],
+            "skill_context": {skill["name"]: skill["evidence"] for skill in skills},
+            "excluded_paragraphs": posting["boilerplate"],
+            "exclusion_rule": posting.get("boilerplate_reason"),
+        })
 
     write_index(board, records, source)
     return records

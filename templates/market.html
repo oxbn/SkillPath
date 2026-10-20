@@ -6,23 +6,32 @@
 <header class="page-header">
   <h1>What the market asks for</h1>
   <p class="subtitle">
-    Skill demand across every cached job posting.
+    Skill mentions across the collected company sample.
     <a href="/">Analyze a single posting instead &rarr;</a>
   </p>
 </header>
 
 <form id="filter-form">
+  <label for="title-filter">Job title contains</label>
   <input
     type="text"
     id="title-filter"
-    placeholder="Filter by job title, e.g. engineer|data|analyst"
+    placeholder="Filter by job title, e.g. engineer"
+    maxlength="200"
     autofocus
   />
+  <div class="actions">
+    <label><input type="checkbox" id="regex-filter" /> Advanced regex</label>
+    <label><input type="checkbox" id="requirements-only" /> Explicit requirements only</label>
+  </div>
   <div class="actions">
     <button type="submit" id="submit-button">Analyze</button>
     <span class="hint" id="corpus-summary"></span>
   </div>
 </form>
+<p class="hint">This sample skews toward technology companies using Greenhouse and Ashby.
+  Percentages describe this sample, not the whole job market. Requirement labels use context rules and may be incomplete.</p>
+<details><summary>Collection details</summary><ul id="corpus-details" class="hint"></ul></details>
 
 <div class="actions">
   <button type="button" id="refresh-button">Refresh now</button>
@@ -71,7 +80,7 @@
       fills.push([fill, (skill.share / top) * 100]);
 
       const share = el("span", "skill-share", `${Math.round(skill.share * 100)}%`);
-      share.title = `${skill.postings} of ${report.postings} postings, ${skill.companies} companies`;
+      share.title = `${skill.postings} of ${report.postings} postings; ${skill.companies} companies (${Math.round(skill.company_share * 100)}% of companies)`;
       item.append(share);
 
       list.append(item);
@@ -95,7 +104,12 @@
     renderMessage(results, "Analyzing…", "loading");
 
     const query = titleFilter.value.trim();
-    const url = query ? `/api/market?title=${encodeURIComponent(query)}` : "/api/market";
+    const params = new URLSearchParams({
+      regex: document.getElementById("regex-filter").checked,
+      requirements_only: document.getElementById("requirements-only").checked,
+    });
+    if (query) params.set("title", query);
+    const url = `/api/market?${params}`;
 
     try {
       const body = await requestJSON(url);
@@ -105,6 +119,11 @@
       const companies = el("span", "companies", `${body.companies} companies`);
       companies.title = body.boards.join(", ");
       summary.replaceChildren(`${body.postings.toLocaleString()} postings · `, companies);
+      const details = document.getElementById("corpus-details");
+      details.replaceChildren();
+      for (const board of body.corpus) {
+        details.append(el("li", "", `${board.board} (${board.source}): collected ${board.fetched_at || "at an unknown time"}; analysis ${board.analysis_version}; vocabulary ${board.vocabulary}`));
+      }
 
       if (body.skills.length === 0) {
         renderMessage(results, "No skills matched this corpus.", "empty");
@@ -112,6 +131,7 @@
         renderSkills(body);
       }
     } catch (error) {
+      summary.replaceChildren();
       renderMessage(results, error.message, "error");
     } finally {
       submitButton.disabled = false;

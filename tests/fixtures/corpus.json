@@ -1,0 +1,9 @@
+{
+  "postings": [
+    {"company": "Acme", "title": "Data Engineer", "text": "Requirements:\nPython and Docker"},
+    {"company": "Acme", "title": "Analyst", "text": "Python is not required. Experience with PostgreSQL."},
+    {"company": "Figma", "title": "Plugin Engineer", "text": "Figma is growing. Experience building plugins with Figma. Python is a plus."},
+    {"company": "Figma", "title": "Designer", "text": "Figma is growing our team."}
+  ],
+  "expected": {"Python": {"postings": 2, "companies": 2, "share": 0.5}, "Docker": {"postings": 1, "companies": 1, "share": 0.25}, "PostgreSQL": {"postings": 1, "companies": 1, "share": 0.25}, "Figma": {"postings": 1, "companies": 1, "share": 0.25}}
+}

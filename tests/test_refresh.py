@@ -66,3 +66,16 @@ def test_stale_vocabulary_rebuilds_without_network(monkeypatch, tmp_path):
     service.refresh(False)
     assert calls == [False]
     assert not service.status()["failed_boards"]
+
+
+def test_corrupt_index_is_rebuilt_from_cache(monkeypatch, tmp_path):
+    service = setup_refresh(monkeypatch, tmp_path)
+    atomic_json(tmp_path / "raw.json", {"postings": []})
+    (tmp_path / "index.json").write_text("broken json")
+    calls = []
+    monkeypatch.setattr(refresh, "load_board", lambda board, refresh, source: calls.append(refresh) or [])
+    monkeypatch.setattr(refresh, "build_index", lambda *args: None)
+    service.lock.acquire()
+    service.refresh(False)
+    assert calls == [False]
+    assert not service.status()["failed_boards"]

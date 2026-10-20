@@ -40,10 +40,10 @@ def posting_skills(posting):
     if names is None:
         return extract_skills(posting["text"])
 
-    return [SKILLS_BY_NAME[name] for name in names if name in SKILLS_BY_NAME]
+    return [SKILLS_BY_NAME[name] for name in dict.fromkeys(names) if name in SKILLS_BY_NAME]
 
 
-def analyze(postings):
+def analyze(postings, requirements_only=False):
     """Rank skills by how many postings mention them at all.
 
     Document frequency, not total mentions: one posting saying "Python" six times must not
@@ -57,7 +57,14 @@ def analyze(postings):
         company = posting.get("company", "")
 
         for skill in posting_skills(posting):
-            if is_self_reference(skill, company):
+            evidence = posting.get("skill_context", {}).get(skill["name"], skill.get("evidence", []))
+            labels = {item["classification"] for item in evidence}
+            explicit = bool(labels & {"required", "optional"})
+            if requirements_only and not explicit:
+                continue
+            if labels and labels <= {"negated", "incidental"}:
+                continue
+            if is_self_reference(skill, company) and not explicit:
                 continue
 
             skills_by_name.setdefault(skill["name"], skill)
@@ -65,6 +72,7 @@ def analyze(postings):
             seen_companies[skill["name"]].add(company)
 
     total = len(postings)
+    total_companies = len({posting.get("company", "") for posting in postings})
     ranked = [
         {
             "name": name,
@@ -73,6 +81,7 @@ def analyze(postings):
             "postings": count,
             "share": count / total if total else 0.0,
             "companies": len(seen_companies[name]),
+            "company_share": len(seen_companies[name]) / total_companies if total_companies else 0.0,
         }
         for name, count in seen_postings.items()
     ]
@@ -80,6 +89,6 @@ def analyze(postings):
 
     return {
         "postings": total,
-        "companies": len({posting.get("company", "") for posting in postings}),
+        "companies": total_companies,
         "skills": ranked,
     }
