@@ -52,6 +52,8 @@ def analyze(postings, requirements_only=False):
     seen_postings = collections.Counter()
     seen_companies = collections.defaultdict(set)
     skills_by_name = {}
+    company_postings = collections.Counter(p.get("company", "") for p in postings)
+    skill_titles = collections.defaultdict(lambda: collections.defaultdict(collections.Counter))
 
     for posting in postings:
         company = posting.get("company", "")
@@ -70,6 +72,7 @@ def analyze(postings, requirements_only=False):
             skills_by_name.setdefault(skill["name"], skill)
             seen_postings[skill["name"]] += 1
             seen_companies[skill["name"]].add(company)
+            skill_titles[skill["name"]][company][posting.get("title", "Untitled role")] += 1
 
     total = len(postings)
     total_companies = len({posting.get("company", "") for posting in postings})
@@ -82,6 +85,13 @@ def analyze(postings, requirements_only=False):
             "share": count / total if total else 0.0,
             "companies": len(seen_companies[name]),
             "company_share": len(seen_companies[name]) / total_companies if total_companies else 0.0,
+            "breakdown": [
+                {"name": company, "postings": sum(titles.values()),
+                 "titles": [{"title": title, "postings": count}
+                            for title, count in sorted(titles.items(), key=lambda item: (-item[1], item[0]))]}
+                for company, titles in sorted(skill_titles[name].items(),
+                                              key=lambda item: (-sum(item[1].values()), item[0]))
+            ],
         }
         for name, count in seen_postings.items()
     ]
@@ -91,4 +101,6 @@ def analyze(postings, requirements_only=False):
         "postings": total,
         "companies": total_companies,
         "skills": ranked,
+        "company_breakdown": [{"name": name, "postings": count}
+                              for name, count in sorted(company_postings.items(), key=lambda item: (-item[1], item[0]))],
     }

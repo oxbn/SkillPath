@@ -55,6 +55,8 @@ The market page supports:
 - Optional **Advanced regex** for expressions such as `engineer|data|analyst`.
 - **Explicit requirements only**, which includes both required and optional skill mentions.
 - The top 40 skills, with posting shares and company counts in tooltips.
+- Click the company count to see employers and their posting counts for the selected titles.
+- Click a skill to see contributing companies; expand each company to inspect matching job titles.
 - Collection details showing source, collection time, vocabulary fingerprint, and analysis version.
 - Refresh progress, failed-board status, and a **Refresh now** button.
 
@@ -200,6 +202,8 @@ rules. Its JSON report has an empty `corpus` metadata list because it bypasses t
 `GET /api/market` accepts `title`, `regex` (default `false`), and `requirements_only`
 (default `false`). Responses include posting/company totals, board tokens, ranked skills,
 per-board collection metadata, and the selected filters.
+The `company_breakdown` field lists company posting counts. Each skill's `breakdown` groups
+its matching postings by company and job title, using the same filters as its headline count.
 
 ```bash
 curl -X POST http://localhost:8000/extract \

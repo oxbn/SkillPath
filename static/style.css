@@ -495,3 +495,53 @@ button:disabled {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Market report details */
+.text-button {
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.text-button:hover:not(:disabled) {
+  background: transparent;
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+.market-label .text-button {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.companies.text-button {
+  border-bottom: 1px dotted currentColor;
+  cursor: pointer;
+}
+#market-dialog {
+  width: min(40rem, calc(100% - 2rem));
+  max-height: 80vh;
+  padding: 1.5rem;
+  overflow: auto;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+#market-dialog::backdrop { background: rgb(0 0 0 / 0.55); }
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+}
+.dialog-header h2 { margin: 0; overflow-wrap: anywhere; }
+.dialog-close { padding: 0.35rem 0.75rem; }
+.detail-list { padding-left: 1.25rem; }
+.detail-list li { margin: 0.4rem 0; overflow-wrap: anywhere; }
+.company-roles { padding: 0.75rem 0; border-top: 1px solid var(--border); }
+.company-roles summary { cursor: pointer; overflow-wrap: anywhere; }

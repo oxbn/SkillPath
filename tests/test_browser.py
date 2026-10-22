@@ -39,7 +39,7 @@ def browser_page(tmp_path_factory):
         else:
             pytest.fail("Browser fixture server did not start")
         with sync_playwright() as playwright:
-            browser = playwright.chromium.launch()
+            browser = playwright.chromium.launch(executable_path=os.environ.get("SKILLPATH_BROWSER_EXECUTABLE"))
             page = browser.new_page()
             yield page, url
             browser.close()
@@ -63,6 +63,15 @@ def test_extraction_filter_errors_theme_and_refresh(browser_page):
     expect(page.locator("html")).to_have_attribute("data-theme", "dark")
     page.goto(url + "/market")
     expect(page.locator("#corpus-summary")).to_contain_text("4 postings")
+    page.get_by_role("button", name="2 companies", exact=True).click()
+    expect(page.get_by_role("dialog")).to_contain_text("Acme · 2 postings")
+    page.get_by_role("button", name="Close details").click()
+    page.get_by_role("button", name="Python", exact=True).click()
+    expect(page.get_by_role("dialog")).to_contain_text("2 of 4 postings")
+    page.get_by_role("dialog").get_by_text("Acme · 1 postings", exact=True).click()
+    expect(page.get_by_role("dialog")).to_contain_text("Data Engineer")
+    page.keyboard.press("Escape")
+    expect(page.get_by_role("dialog")).not_to_be_visible()
     page.get_by_label("Job title contains").fill("analyst")
     page.get_by_role("button", name="Analyze", exact=True).click()
     expect(page.locator("#corpus-summary")).to_contain_text("1 postings")

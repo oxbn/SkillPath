@@ -39,6 +39,13 @@
 </div>
 
 <section id="results" aria-live="polite"></section>
+<dialog id="market-dialog" aria-labelledby="dialog-title">
+  <div class="dialog-header">
+    <h2 id="dialog-title"></h2>
+    <form method="dialog"><button type="submit" class="dialog-close" aria-label="Close details">Close</button></form>
+  </div>
+  <div id="dialog-body"></div>
+</dialog>
 {% endblock %}
 
 {% block script %}
@@ -48,6 +55,42 @@
   const submitButton = document.getElementById("submit-button");
   const summary = document.getElementById("corpus-summary");
   const results = document.getElementById("results");
+  const marketDialog = document.getElementById("market-dialog");
+  const dialogTitle = document.getElementById("dialog-title");
+  const dialogBody = document.getElementById("dialog-body");
+
+  function openDetails(title) {
+    dialogTitle.textContent = title;
+    dialogBody.replaceChildren();
+    marketDialog.showModal();
+  }
+
+  function showCompanies(report) {
+    openDetails(`${report.companies} companies`);
+    dialogBody.append(el("p", "hint", "Posting counts reflect the current job-title filter, including postings without recognized skills."));
+    const list = el("ul", "detail-list");
+    for (const company of report.company_breakdown) {
+      list.append(el("li", "", `${company.name || "Unknown company"} · ${company.postings.toLocaleString()} postings`));
+    }
+    dialogBody.append(list);
+  }
+
+  function showSkill(skill, report) {
+    openDetails(skill.display_name);
+    dialogBody.append(el("p", "hint", skill.category));
+    dialogBody.append(el("p", "", `${skill.postings.toLocaleString()} of ${report.postings.toLocaleString()} postings (${Math.round(skill.share * 100)}%) across ${skill.companies} companies.`));
+    dialogBody.append(el("p", "hint", "Matching companies and job titles for the filters used in this report. Expand a company to see its roles."));
+    for (const company of skill.breakdown) {
+      const details = el("details", "company-roles");
+      details.append(el("summary", "", `${company.name || "Unknown company"} · ${company.postings.toLocaleString()} postings`));
+      const titles = el("ul", "detail-list");
+      for (const role of company.titles) {
+        titles.append(el("li", "", `${role.title} · ${role.postings} ${role.postings === 1 ? "posting" : "postings"}`));
+      }
+      details.append(titles);
+      dialogBody.append(details);
+    }
+  }
 
   function renderSkills(report) {
     results.replaceChildren();
@@ -61,8 +104,11 @@
       const item = document.createElement("li");
 
       const label = el("div", "market-label");
-      const name = el("span", "skill-name", skill.display_name);
-      name.title = skill.display_name;
+      const name = el("button", "skill-name text-button", skill.display_name);
+      name.type = "button";
+      name.title = `View companies and roles mentioning ${skill.display_name}`;
+      name.setAttribute("aria-haspopup", "dialog");
+      name.addEventListener("click", () => showSkill(skill, report));
       label.append(name);
 
       // A high share carried by a single company is usually that company's own jargon,
@@ -114,10 +160,10 @@
     try {
       const body = await requestJSON(url);
 
-      // Thirty-odd board names wrapped to three lines and crowded the form, so the list
-      // moves into a tooltip and only the count stays on screen.
-      const companies = el("span", "companies", `${body.companies} companies`);
-      companies.title = body.boards.join(", ");
+      const companies = el("button", "companies text-button", `${body.companies} companies`);
+      companies.type = "button";
+      companies.setAttribute("aria-haspopup", "dialog");
+      companies.addEventListener("click", () => showCompanies(body));
       summary.replaceChildren(`${body.postings.toLocaleString()} postings · `, companies);
       const details = document.getElementById("corpus-details");
       details.replaceChildren();

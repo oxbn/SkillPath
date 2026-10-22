@@ -91,6 +91,20 @@ def extract(request: ExtractRequest) -> ExtractResponse:
     return ExtractResponse(skills=extract_skills(request.text))
 
 
+class CompanyCount(BaseModel):
+    name: str
+    postings: int
+
+
+class TitleCount(BaseModel):
+    title: str
+    postings: int
+
+
+class SkillCompany(CompanyCount):
+    titles: list[TitleCount]
+
+
 class MarketSkill(BaseModel):
     name: str
     display_name: str
@@ -99,6 +113,7 @@ class MarketSkill(BaseModel):
     share: float
     companies: int
     company_share: float
+    breakdown: list[SkillCompany]
 
 
 class CorpusBoard(BaseModel):
@@ -119,6 +134,7 @@ class MarketResponse(BaseModel):
     title: str | None
     regex: bool
     requirements_only: bool
+    company_breakdown: list[CompanyCount]
 
 
 # The corpus only changes when the cache is refetched, so re-analyzing it on every request

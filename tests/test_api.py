@@ -75,3 +75,16 @@ def test_refresh_origin_and_duplicate_request(client):
     assert response.status_code == 202
     assert response.json()["started"] is False
     assert client.get("/api/refresh").json()["running"] is False
+
+
+def test_company_and_skill_details_follow_report_filters(corpus):
+    report = corpus.get("/api/market", params={"title": "engineer", "requirements_only": True}).json()
+    assert report["company_breakdown"] == [{"name": "Acme", "postings": 1}, {"name": "Figma", "postings": 1}]
+    python = next(skill for skill in report["skills"] if skill["name"] == "python")
+    assert python["breakdown"] == [
+        {"name": "Acme", "postings": 1, "titles": [{"title": "Data Engineer", "postings": 1}]},
+        {"name": "Figma", "postings": 1, "titles": [{"title": "Plugin Engineer", "postings": 1}]},
+    ]
+    figma = next(skill for skill in report["skills"] if skill["name"] == "figma")
+    assert figma["breakdown"] == [{"name": "Figma", "postings": 1,
+                                  "titles": [{"title": "Plugin Engineer", "postings": 1}]}]
